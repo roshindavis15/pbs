@@ -11,7 +11,16 @@ export const addUniversityHierarchy = async (req, res) => {
 
   try {   
     transaction = await sequelize.transaction(); 
+    let iconUrl, imageUrl;
+    if (icon) {
+      const iconUpload = await cloudinary.uploader.upload(icon, { folder: 'university/icons' });
+      iconUrl = iconUpload.secure_url;
+    }
 
+    if (image) {
+      const imageUpload = await cloudinary.uploader.upload(image, { folder: 'university/images' });
+      imageUrl = imageUpload.secure_url;
+    }
     
     let universityCard = await UniversityCard.findOne({ where: { name }, transaction });
 
@@ -19,7 +28,7 @@ export const addUniversityHierarchy = async (req, res) => {
       console.log(`UniversityCard with name "${name}" already exists.`);
     } else {
       
-      universityCard = await UniversityCard.create({ name, icon, image }, { transaction });
+      universityCard = await UniversityCard.create({ name, icon:iconUrl, image:imageUrl }, { transaction });
     }
 
     for (const moduleData of modules) {
@@ -177,6 +186,7 @@ export const editModule = async (req, res) => {
   }
 };
 
+
 export const editChapter = async (req, res) => {
   const { id } = req.query;
   console.log("id:",id);
@@ -212,3 +222,55 @@ export const editChapter = async (req, res) => {
     res.status(500).json({ success: false, error: 'Server error' });
   }
 };
+
+
+export const deleteData= async(req,res)=>{
+  const {id}=req.query;
+  console.log("id:",id);
+
+  try {
+    // Check if it's a UniversityCard
+    const universityCard = await UniversityCard.findByPk(id);
+    if (universityCard) {
+      // Delete related modules and chapters
+      await Module.destroy({
+        where: { universityCardId: id },
+      });
+      await UniversityCard.destroy({
+        where: { id },
+      });
+      return res.status(200).json({ message: 'University card and related modules deleted successfully.' });
+    }
+
+    // Check if it's a Module
+    const module = await Module.findByPk(id);
+    if (module) {
+      // Delete related chapters
+      await Chapter.destroy({
+        where: { moduleId: id },
+      });
+      await Module.destroy({
+        where: { id },
+      });
+      return res.status(200).json({ message: 'Module and related chapters deleted successfully.' });
+    }
+
+    // Check if it's a Chapter
+    const chapter = await Chapter.findByPk(id);
+    if (chapter) {
+      await Chapter.destroy({
+        where: { id },
+      });
+      return res.status(200).json({ message: 'Chapter deleted successfully.' });
+    }
+
+    return res.status(404).json({ message: 'Item not found.' });
+  } catch (error) {
+    console.log(error.message);
+    res.status(500).json({
+      success: false,
+      error: 'Server error',
+    });
+  }
+}
+

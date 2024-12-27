@@ -25,7 +25,7 @@ const Chapter = sequelize.define('Chapter', {
         type: DataTypes.STRING,
     },
     moduleId: {
-      type: DataTypes.UUID,  // Change this to UUID as well
+      type: DataTypes.UUID,  
       allowNull: false
     }
 });
