@@ -6,11 +6,11 @@ import { v4 as uuid } from 'uuid';
 
 
 export const addUniversityHierarchy = async (req, res) => {
+
   const { id } = req.query;
   const { metadata } = req.body;
   const formData = JSON.parse(metadata);
   const { name, modules } = formData;
-
 
   console.log("name:",name);
   console.log("modules:",modules)
@@ -18,7 +18,7 @@ export const addUniversityHierarchy = async (req, res) => {
 
   let transaction;
   try {
-    // Parse modules data if it's sent as string
+
     try {
       parsedModules = typeof modules === 'string' ? JSON.parse(modules) : modules;
       console.log("parsedModules:",parsedModules);
@@ -28,32 +28,26 @@ export const addUniversityHierarchy = async (req, res) => {
         error: 'Invalid modules data format'
       });
     }
- console.log('one')
     transaction = await sequelize.transaction();
 
 
-    console.log(req.file,'&&&&&&&&&&&&&&&')
+    // console.log(req.files,'@@@@@@@@@@@@@@@@@@@@@')
 
 
     let iconUrl, imageUrl;
-    if (req.files.icon) {
+    if (req.files && req.files.icon) {
       const iconBuffer = req.files.icon[0].buffer;
-      // const iconUpload = await uploadToCloudinary.uploader.upload(
-      //   `data:${req.files.icon[0].mimetype};base64,${iconBuffer.toString('base64')}`,
-      //   { folder: 'university/icons' }
-      // );
-      const iconUpload = await uploadToCloudinary(iconBuffer)
-      iconUrl = iconUpload.secure_url;
-    }
+      try {
+        iconUrl = await uploadToCloudinary(iconBuffer);
+      } catch (error) {
+          console.error('Error uploading icon:', error);
+      }
+  }
 
     console.log('two')
 
-    if (req.files.image) {
+    if (req.files && req.files.image) {
       const imageBuffer = req.files.image[0].buffer;
-      // const imageUpload = await uploadToCloudinary.uploader.upload(
-      //   `data:${req.files.image[0].mimetype};base64,${imageBuffer.toString('base64')}`,
-      //   { folder: 'university/images' }
-      // );
       const imageUpload = await uploadToCloudinary(imageBuffer)
       imageUrl = imageUpload.secure_url;
     }
