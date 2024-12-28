@@ -1,3 +1,5 @@
+import uploadToCloudinary from '../config/cloudinary.js';
+import cloudinary from '../config/cloudinary.js';
 import { UniversityCard, Module, Chapter, sequelize } from '../models/index.js';
 import { v4 as uuid } from 'uuid';
 
@@ -5,14 +7,16 @@ import { v4 as uuid } from 'uuid';
 
 export const addUniversityHierarchy = async (req, res) => {
   const { id } = req.query;
-  console.log("req.bodyyyyyy:",req.body)
-  const { name, modules } = req.body;
+  const { metadata } = req.body;
+  const formData = JSON.parse(metadata);
+  const { name, modules } = formData;
+
+
   console.log("name:",name);
   console.log("modules:",modules)
   let parsedModules;
 
   let transaction;
-
   try {
     // Parse modules data if it's sent as string
     try {
@@ -24,28 +28,40 @@ export const addUniversityHierarchy = async (req, res) => {
         error: 'Invalid modules data format'
       });
     }
-
+ console.log('one')
     transaction = await sequelize.transaction();
 
-    // Handle file uploads
+
+    console.log(req.file,'&&&&&&&&&&&&&&&')
+
+
     let iconUrl, imageUrl;
     if (req.files.icon) {
       const iconBuffer = req.files.icon[0].buffer;
-      const iconUpload = await cloudinary.uploader.upload(
-        `data:${req.files.icon[0].mimetype};base64,${iconBuffer.toString('base64')}`,
-        { folder: 'university/icons' }
-      );
+      // const iconUpload = await uploadToCloudinary.uploader.upload(
+      //   `data:${req.files.icon[0].mimetype};base64,${iconBuffer.toString('base64')}`,
+      //   { folder: 'university/icons' }
+      // );
+      const iconUpload = await uploadToCloudinary(iconBuffer)
       iconUrl = iconUpload.secure_url;
     }
 
+    console.log('two')
+
     if (req.files.image) {
       const imageBuffer = req.files.image[0].buffer;
-      const imageUpload = await cloudinary.uploader.upload(
-        `data:${req.files.image[0].mimetype};base64,${imageBuffer.toString('base64')}`,
-        { folder: 'university/images' }
-      );
+      // const imageUpload = await uploadToCloudinary.uploader.upload(
+      //   `data:${req.files.image[0].mimetype};base64,${imageBuffer.toString('base64')}`,
+      //   { folder: 'university/images' }
+      // );
+      const imageUpload = await uploadToCloudinary(imageBuffer)
       imageUrl = imageUpload.secure_url;
     }
+
+
+    console.log(iconUrl , 'icons url')
+    console.log(imageUrl,'image url')
+    console.log('three')
 
     // Find or create university card
     let universityCard = await UniversityCard.findOne({
@@ -138,6 +154,7 @@ export const addUniversityHierarchy = async (req, res) => {
     }
 
     await transaction.commit();
+
 
     res.status(201).json({
       success: true,
