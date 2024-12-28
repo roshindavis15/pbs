@@ -31,33 +31,51 @@ export const addUniversityHierarchy = async (req, res) => {
     transaction = await sequelize.transaction();
 
 
-    // console.log(req.files,'@@@@@@@@@@@@@@@@@@@@@')
+//     let iconUrl, imageUrl;
+//     const iconFile = req.files.find(file => file.fieldname === 'icon');
+//     const imageFile = req.files.find(file => file.fieldname === 'image');
+    
+//     if (req?.files && iconFile) {
+//       const iconBuffer = iconFile?.buffer;
+//       try {
+//         iconUrl = await uploadToCloudinary(iconBuffer);
+//       } catch (error) {
+//           console.error('Error uploading icon:', error);
+//       }
+//   }
+
+//   if (req?.files && imageFile) {
+//     const imageBuffer = imageFile?.buffer;
+//     try {
+//       iconUrl = await uploadToCloudinary(imageBuffer);
+//     } catch (error) {
+//         console.error('Error uploading icon:', error);
+//     }
+// }
 
 
-    let iconUrl, imageUrl;
-    if (req.files && req.files.icon) {
-      const iconBuffer = req.files.icon[0].buffer;
-      try {
-        iconUrl = await uploadToCloudinary(iconBuffer);
-      } catch (error) {
-          console.error('Error uploading icon:', error);
+
+const uploadedFiles = {}; 
+
+if (req?.files?.length > 0) {
+  for (const file of req.files) {
+    const { fieldname, buffer } = file;
+
+    try {
+      const uploadedUrl = await uploadToCloudinary(buffer);
+      if (!uploadedFiles[fieldname]) {
+        uploadedFiles[fieldname] = [];
       }
-  }
-
-    console.log('two')
-
-    if (req.files && req.files.image) {
-      const imageBuffer = req.files.image[0].buffer;
-      const imageUpload = await uploadToCloudinary(imageBuffer)
-      imageUrl = imageUpload.secure_url;
+      uploadedFiles[fieldname].push(uploadedUrl);
+    } catch (error) {
+      console.error(`Error uploading file with fieldname ${fieldname}:`, error);
     }
+  }
+}
+
+console.log('Uploaded Files:', uploadedFiles);
 
 
-    console.log(iconUrl , 'icons url')
-    console.log(imageUrl,'image url')
-    console.log('three')
-
-    // Find or create university card
     let universityCard = await UniversityCard.findOne({
       where: { name },
       transaction
