@@ -12,8 +12,8 @@ export const addUniversityHierarchy = async (req, res) => {
   const formData = JSON.parse(metadata);
   const { name, modules } = formData;
 
-  console.log("name:",name);
-  console.log("modules:",modules)
+  console.log("name:", name);
+  console.log("modules:", modules)
   let parsedModules;
 
   let transaction;
@@ -21,7 +21,7 @@ export const addUniversityHierarchy = async (req, res) => {
 
     try {
       parsedModules = typeof modules === 'string' ? JSON.parse(modules) : modules;
-      console.log("parsedModules:",parsedModules);
+      console.log("parsedModules:", parsedModules);
     } catch (error) {
       return res.status(400).json({
         success: false,
@@ -31,49 +31,25 @@ export const addUniversityHierarchy = async (req, res) => {
     transaction = await sequelize.transaction();
 
 
-//     let iconUrl, imageUrl;
-//     const iconFile = req.files.find(file => file.fieldname === 'icon');
-//     const imageFile = req.files.find(file => file.fieldname === 'image');
-    
-//     if (req?.files && iconFile) {
-//       const iconBuffer = iconFile?.buffer;
-//       try {
-//         iconUrl = await uploadToCloudinary(iconBuffer);
-//       } catch (error) {
-//           console.error('Error uploading icon:', error);
-//       }
-//   }
+    const uploadedFiles = {};
 
-//   if (req?.files && imageFile) {
-//     const imageBuffer = imageFile?.buffer;
-//     try {
-//       iconUrl = await uploadToCloudinary(imageBuffer);
-//     } catch (error) {
-//         console.error('Error uploading icon:', error);
-//     }
-// }
+    if (req?.files?.length > 0) {
+      for (const file of req.files) {
+        const { fieldname, buffer } = file;
 
-
-
-const uploadedFiles = {}; 
-
-if (req?.files?.length > 0) {
-  for (const file of req.files) {
-    const { fieldname, buffer } = file;
-
-    try {
-      const uploadedUrl = await uploadToCloudinary(buffer);
-      if (!uploadedFiles[fieldname]) {
-        uploadedFiles[fieldname] = [];
+        try {
+          const uploadedUrl = await uploadToCloudinary(buffer);
+          if (!uploadedFiles[fieldname]) {
+            uploadedFiles[fieldname] = [];
+          }
+          uploadedFiles[fieldname].push(uploadedUrl);
+        } catch (error) {
+          console.error(`Error uploading file with fieldname ${fieldname}:`, error);
+        }
       }
-      uploadedFiles[fieldname].push(uploadedUrl);
-    } catch (error) {
-      console.error(`Error uploading file with fieldname ${fieldname}:`, error);
     }
-  }
-}
 
-console.log('Uploaded Files:', uploadedFiles);
+    console.log('Uploaded Files:', uploadedFiles);
 
 
     let universityCard = await UniversityCard.findOne({
@@ -136,9 +112,9 @@ console.log('Uploaded Files:', uploadedFiles);
           const pdfBuffer = req.files.pdf[0].buffer;
           const pdfUpload = await cloudinary.uploader.upload(
             `data:${req.files.pdf[0].mimetype};base64,${pdfBuffer.toString('base64')}`,
-            { 
+            {
               folder: 'university/pdfs',
-              resource_type: 'raw' 
+              resource_type: 'raw'
             }
           );
           pdfUrl = pdfUpload.secure_url;
@@ -217,34 +193,34 @@ export const getUniversityHierarchy = async (req, res) => {
   }
 };
 
-  export const editUniversityCard = async (req, res) => {
-    const { id } = req.query;
-    console.log("id:",id);
-    const { name, icon, image } = req.body;
+export const editUniversityCard = async (req, res) => {
+  const { id } = req.query;
+  console.log("id:", id);
+  const { name, icon, image } = req.body;
 
-    try {
-      const universityCard = await UniversityCard.findByPk(id);
-      console.log("universityCard:",universityCard);  
+  try {
+    const universityCard = await UniversityCard.findByPk(id);
+    console.log("universityCard:", universityCard);
 
-      if (!universityCard) {
-        return res.status(404).json({
-          success: false,
-          message: 'University card not found'
-        });
-      }
-
-      await universityCard.update({ name, icon, image });
-
-      res.status(200).json({
-        success: true,
-        message: 'University card updated successfully',
-        data: universityCard
+    if (!universityCard) {
+      return res.status(404).json({
+        success: false,
+        message: 'University card not found'
       });
-    } catch (error) {
-      console.error('Error in editUniversityCard:', error);
-      res.status(500).json({ success: false, error: 'Server error' });
     }
-  };
+
+    await universityCard.update({ name, icon, image });
+
+    res.status(200).json({
+      success: true,
+      message: 'University card updated successfully',
+      data: universityCard
+    });
+  } catch (error) {
+    console.error('Error in editUniversityCard:', error);
+    res.status(500).json({ success: false, error: 'Server error' });
+  }
+};
 
 export const editModule = async (req, res) => {
   const { id } = req.query;
@@ -276,12 +252,12 @@ export const editModule = async (req, res) => {
 
 export const editChapter = async (req, res) => {
   const { id } = req.query;
-  console.log("id:",id);
+  console.log("id:", id);
   const { name, image, readingTime, pdf, summary } = req.body;
 
   try {
     const chapter = await Chapter.findByPk(id);
-    console.log("chapter:",chapter);
+    console.log("chapter:", chapter);
 
     if (!chapter) {
       console.log("herer")
@@ -311,9 +287,9 @@ export const editChapter = async (req, res) => {
 };
 
 
-export const deleteData= async(req,res)=>{
-  const {id}=req.query;
-  console.log("id:",id);
+export const deleteData = async (req, res) => {
+  const { id } = req.query;
+  console.log("id:", id);
 
   try {
     // Check if it's a UniversityCard
