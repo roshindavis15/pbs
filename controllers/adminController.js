@@ -182,7 +182,7 @@ export const getUniversityHierarchy = async (req, res) => {
       ],
       attributes: ['id', 'name', 'icon', 'image'],
     });
-
+console.log(universityCards,'hi')
     res.status(200).json({
       success: true,
       data: universityCards,
