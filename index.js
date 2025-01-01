@@ -9,7 +9,7 @@
     const port = process.env.PORT || 3000;
 
     app.use(cors({
-        origin: ["https://pbs-dashboard.vercel.app", "*"]
+        origin: "https://pbs-dashboard.vercel.app",
       }));
     app.use(express.json());
     app.use('/admin', adminRouter);
