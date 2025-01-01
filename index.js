@@ -8,22 +8,13 @@
     const app = express();
     const port = process.env.PORT || 3000;
 
-    // app.use(cors({
-    //     origin: ["https://pbs-dashboard.vercel.app","*"], 
-    //     credentials: true 
-    //   }));
-
     app.use(cors({
-        origin: ["https://pbs-dashboard.vercel.app", "http://localhost:3000"],
-        credentials: true,
+        origin: ["https://pbs-dashboard.vercel.app", "*"],
         methods: ['GET', 'POST', 'PUT', 'DELETE'],
-        allowedHeaders: ['Content-Type', 'Authorization']
       }));
-      
     app.use(express.json());
     app.use('/admin', adminRouter);
 
-    // Initialize database before starting server
     const startServer = async () => {
         try {
             await initializeDatabase();
