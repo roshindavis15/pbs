@@ -1,162 +1,82 @@
-import uploadToCloudinary from '../config/cloudinary.js';
-import cloudinary from '../config/cloudinary.js';
+import { v2 as cloudinary } from 'cloudinary';
 import { UniversityCard, Module, Chapter, sequelize } from '../models/index.js';
 import { v4 as uuid } from 'uuid';
 
 
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
 
 export const addUniversityHierarchy = async (req, res) => {
+  const { name, modules } = req.body;
+  const files = req.files;
 
-  const { id } = req.query;
-  const { metadata } = req.body;
-  const formData = JSON.parse(metadata);
-  const { name, modules } = formData;
-
-  console.log("name:", name);
-  console.log("modules:", modules)
-  let parsedModules;
-
-  let transaction;
   try {
+    // Process UniversityCard icon and image
+    const iconFile = files.find((file) => file.fieldname === 'icon');
+    const imageFile = files.find((file) => file.fieldname === 'image');
 
-    try {
-      parsedModules = typeof modules === 'string' ? JSON.parse(modules) : modules;
-      console.log("parsedModules:", parsedModules);
-    } catch (error) {
-      return res.status(400).json({
-        success: false,
-        error: 'Invalid modules data format'
-      });
-    }
-    transaction = await sequelize.transaction();
+    const iconUrl = iconFile ? await uploadToCloudinary(iconFile, 'universityCard/icons') : null;
+    const imageUrl = imageFile ? await uploadToCloudinary(imageFile, 'universityCard/images') : null;
 
-
-    const uploadedFiles = {};
-
-    if (req?.files?.length > 0) {
-      for (const file of req.files) {
-        const { fieldname, buffer } = file;
-
-        try {
-          const uploadedUrl = await uploadToCloudinary(buffer);
-          if (!uploadedFiles[fieldname]) {
-            uploadedFiles[fieldname] = [];
-          }
-          uploadedFiles[fieldname].push(uploadedUrl);
-        } catch (error) {
-          console.error(`Error uploading file with fieldname ${fieldname}:`, error);
-        }
-      }
-    }
-
-    console.log('Uploaded Files:', uploadedFiles);
-
-
-    let universityCard = await UniversityCard.findOne({
-      where: { name },
-      transaction
+    // Create UniversityCard entry
+    const universityCard = await UniversityCard.create({
+      name,
+      icon: iconUrl,
+      image: imageUrl,
     });
 
-    if (!universityCard) {
-      universityCard = await UniversityCard.create(
-        { name, icon: iconUrl, image: imageUrl },
-        { transaction }
+    // Process each module
+    for (const module of modules) {
+      const moduleImageFile = files.find(
+        (file) => file.fieldname === `module_${module.name}_image`
       );
-    }
 
-    // Process modules
-    for (const moduleData of parsedModules) {
-      const { name: moduleName, chapters } = moduleData;
+      const moduleImageUrl = moduleImageFile
+        ? await uploadToCloudinary(moduleImageFile, 'modules/images')
+        : null;
 
-      let moduleImageUrl;
-      if (req.files.moduleImage) {
-        const moduleImageBuffer = req.files.moduleImage[0].buffer;
-        const moduleImageUpload = await cloudinary.uploader.upload(
-          `data:${req.files.moduleImage[0].mimetype};base64,${moduleImageBuffer.toString('base64')}`,
-          { folder: 'university/modules' }
-        );
-        moduleImageUrl = moduleImageUpload.secure_url;
-      }
-
-      let module = await Module.findOne({
-        where: { name: moduleName, universityCardId: universityCard.id },
-        transaction,
+      const createdModule = await Module.create({
+        name: module.name,
+        image: moduleImageUrl,
+        universityCardId: universityCard.id,
       });
 
-      if (!module) {
-        module = await Module.create(
-          {
-            name: moduleName,
-            image: moduleImageUrl,
-            universityCardId: universityCard.id,
-          },
-          { transaction }
+      // Process each chapter in the module
+      for (const chapter of module.chapters) {
+        const chapterImageFile = files.find(
+          (file) => file.fieldname === `chapter_${chapter.name}_image`
         );
-      }
 
-      // Process chapters
-      for (const chapterData of chapters) {
-        const { name: chapterName, readingTime, summary } = chapterData;
+        const chapterPdfFile = files.find(
+          (file) => file.fieldname === `chapter_${chapter.name}_pdf`
+        );
 
-        let chapterImageUrl, pdfUrl;
-        if (req.files.chapterImage) {
-          const chapterImageBuffer = req.files.chapterImage[0].buffer;
-          const chapterImageUpload = await cloudinary.uploader.upload(
-            `data:${req.files.chapterImage[0].mimetype};base64,${chapterImageBuffer.toString('base64')}`,
-            { folder: 'university/chapters' }
-          );
-          chapterImageUrl = chapterImageUpload.secure_url;
-        }
+        const chapterImageUrl = chapterImageFile
+          ? await uploadToCloudinary(chapterImageFile, 'chapters/images')
+          : null;
 
-        if (req.files.pdf) {
-          const pdfBuffer = req.files.pdf[0].buffer;
-          const pdfUpload = await cloudinary.uploader.upload(
-            `data:${req.files.pdf[0].mimetype};base64,${pdfBuffer.toString('base64')}`,
-            {
-              folder: 'university/pdfs',
-              resource_type: 'raw'
-            }
-          );
-          pdfUrl = pdfUpload.secure_url;
-        }
+        const chapterPdfUrl = chapterPdfFile
+          ? await uploadToCloudinary(chapterPdfFile, 'chapters/pdfs')
+          : null;
 
-        const chapter = await Chapter.findOne({
-          where: { name: chapterName, moduleId: module.id },
-          transaction,
+        await Chapter.create({
+          name: chapter.name,
+          summary: chapter.summary,
+          image: chapterImageUrl,
+          readingTime: chapter.readingTime,
+          pdf: chapterPdfUrl,
+          moduleId: createdModule.id,
         });
-
-        if (!chapter) {
-          await Chapter.create(
-            {
-              name: chapterName,
-              image: chapterImageUrl,
-              readingTime,
-              pdf: pdfUrl,
-              summary,
-              moduleId: module.id,
-            },
-            { transaction }
-          );
-        }
       }
     }
 
-    await transaction.commit();
-
-
-    res.status(201).json({
-      success: true,
-      message: 'University hierarchy added successfully',
-      id,
-      universityCard: { id: universityCard.id, name: universityCard.name },
-    });
+    res.status(201).json({ message: 'University hierarchy created successfully.' });
   } catch (error) {
-    if (transaction) await transaction.rollback();
-    console.error('Error:', error);
-    res.status(500).json({
-      success: false,
-      error: error.message || 'Server error'
-    });
+    console.error(error);
+    res.status(500).json({ message: 'An error occurred while creating the hierarchy.', error });
   }
 };
 
