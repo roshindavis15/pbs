@@ -14,6 +14,7 @@
     app.use(express.json());
     app.use('/admin', adminRouter);
 
+
     const startServer = async () => {
         try {
             await initializeDatabase();

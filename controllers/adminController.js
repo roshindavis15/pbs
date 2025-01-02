@@ -82,8 +82,6 @@ export const addUniversityHierarchy = async (req, res) => {
 };
 
 
-
-
 export const getUniversityHierarchy = async (req, res) => {
   try {
     const universityCards = await UniversityCard.findAll({
