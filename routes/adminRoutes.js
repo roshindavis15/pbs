@@ -3,7 +3,7 @@ import { addUniversityHierarchy, deleteData, editChapter, editModule, editUniver
 
 import multer from 'multer';
 
-const allowedImageTypes = ['image/jpeg', 'image/png', 'image/jpg', 'image/gif'];
+const allowedImageTypes = ['image/jpeg', 'image/png', 'image/jpg', 'image/gif', 'image/webp'];
 const allowedPDFTypes = ['application/pdf'];
 
 // Multer configuration
