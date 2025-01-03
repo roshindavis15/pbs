@@ -2,7 +2,7 @@
 import { DataTypes } from 'sequelize';
 import sequelize from '../config/db.js';
 
-const UniversityCard = sequelize.define('UniversityCard', {
+const Vertical = sequelize.define('Vertical', {
   id:{
     type:DataTypes.UUID,
     defaultValue:DataTypes.UUIDV4,
@@ -22,4 +22,4 @@ const UniversityCard = sequelize.define('UniversityCard', {
     
 });
 
-export default UniversityCard;
+export default Vertical;

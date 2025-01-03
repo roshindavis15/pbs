@@ -8,14 +8,14 @@ const Chapter = sequelize.define('Chapter', {
     defaultValue:DataTypes.UUIDV4,
     primaryKey:true
   },
-    name: {
+    chapterName: {
         type: DataTypes.STRING,
         allowNull: false,
     },
     summary: {
         type: DataTypes.STRING,
     },
-    image: {
+    chapterImage: {
         type: DataTypes.STRING,
     },
     readingTime: {

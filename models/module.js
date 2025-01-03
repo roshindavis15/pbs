@@ -8,14 +8,14 @@ const Module = sequelize.define('Module', {
     defaultValue:DataTypes.UUIDV4,
     primaryKey:true
   },
-    name: {
+    moduleName: {
         type: DataTypes.STRING,
         allowNull: false,
     },
-    image: {
+    moduleImage: {
         type: DataTypes.STRING,
     },
-    universityCardId: {
+    verticalId: {
       type: DataTypes.UUID,  // Change this to UUID as well
       allowNull: false
     }
