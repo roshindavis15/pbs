@@ -13,11 +13,26 @@ cloudinary.config({
 export const addUniversityHierarchy = async (req, res) => {
   console.log('req.body:', req.body);
   try {
-    const { name, modules } = req.body;
-    const files = req.files;
+    const { name } = req.body;
+    // Parse modules if it's a string
+    const modules = typeof req.body.modules === 'string' ? JSON.parse(req.body.modules) : req.body.modules;
+    
+    // Handle files safely
+    const files = req.files || {};
+    
+    // Helper function to find file
+    const findFile = (fieldname) => {
+      if (Array.isArray(files)) {
+        return files.find(file => file.fieldname === fieldname);
+      } else if (typeof files === 'object') {
+        return files[fieldname]?.[0];
+      }
+      return null;
+    };
+
     // Process Vertical icon and image
-    const iconFile = files.find((file) => file.fieldname === 'icon');
-    const imageFile = files.find((file) => file.fieldname === 'image');
+    const iconFile = findFile('icon');
+    const imageFile = findFile('image');
 
     const iconUrl = iconFile ? await uploadToCloudinary(iconFile, 'verticals/icons') : null;
     const imageUrl = imageFile ? await uploadToCloudinary(imageFile, 'verticals/images') : null;
@@ -31,11 +46,9 @@ export const addUniversityHierarchy = async (req, res) => {
 
     // Process each module
     for (const module of modules) {
-      const moduleImageFile = files.find(
-        (file) => file.fieldname === `moduleImage_${module.moduleName}`
-      );
-
-      const moduleImageUrl = moduleImageFile
+      const moduleImageFile = findFile(`moduleImage_${module.moduleName}`);
+      
+      const moduleImageUrl = moduleImageFile 
         ? await uploadToCloudinary(moduleImageFile, 'modules/images')
         : null;
 
@@ -46,15 +59,10 @@ export const addUniversityHierarchy = async (req, res) => {
       });
 
       // Process each chapter in the module
-      if (module.chapters) {
+      if (module.chapters && Array.isArray(module.chapters)) {
         for (const chapter of module.chapters) {
-          const chapterImageFile = files.find(
-            (file) => file.fieldname === `chapterImage_${chapter.chapterName}`
-          );
-
-          const pdfFile = files.find(
-            (file) => file.fieldname === `pdf_${chapter.chapterName}`
-          );
+          const chapterImageFile = findFile(`chapterImage_${chapter.chapterName}`);
+          const pdfFile = findFile(`pdf_${chapter.chapterName}`);
 
           const chapterImageUrl = chapterImageFile
             ? await uploadToCloudinary(chapterImageFile, 'chapters/images')
@@ -79,10 +87,12 @@ export const addUniversityHierarchy = async (req, res) => {
     res.status(200).json({ message: 'University hierarchy created successfully.' });
   } catch (error) {
     console.error('Error creating hierarchy:', error);
-    res.status(500).json({ message: 'An error occurred while creating the hierarchy.', error });
+    res.status(500).json({ 
+      message: 'An error occurred while creating the hierarchy.', 
+      error: error.message 
+    });
   }
 };
-
 
 export const getUniversityHierarchy = async (req, res) => {
   try {
