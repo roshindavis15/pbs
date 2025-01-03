@@ -43,10 +43,10 @@ const upload = multer({
 
 const uploadMiddleware = (req, res, next) => {
   const uploadFields = [
-      { name: 'image1', maxCount: 1 },
-      { name: 'image2', maxCount: 1 },
-      { name: 'image3', maxCount: 1 },
-      { name: 'image4', maxCount: 1 },
+      { name: 'image', maxCount: 1 },
+      { name: 'moduleImage', maxCount: 1 },
+      { name: 'icon', maxCount: 1 },
+      { name: 'chapterImage', maxCount: 1 },
       { name: 'pdfFile', maxCount: 1 }
   ];
 
