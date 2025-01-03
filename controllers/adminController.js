@@ -8,7 +8,7 @@ import uploadToCloudinary from '../config/cloudinary.js';
 export const addUniversityHierarchy = async (req, res) => {
   console.log('req.body:', req.body);
   try {
-    const { name , image , icon } = req.body;
+    const { name  } = req.body;
     // Parse modules if it's a string
     const modules = typeof req.body.modules === 'string' ? JSON.parse(req.body.modules) : req.body.modules;
     
@@ -28,6 +28,7 @@ export const addUniversityHierarchy = async (req, res) => {
     // Process Vertical icon and image
     const iconFile = findFile('icon');
     const imageFile = findFile('image');
+    console.log(iconFile,imageFile,'ho')
 
     const iconUrl = iconFile ? await uploadToCloudinary(iconFile, 'verticals/icons') : null;
     const imageUrl = imageFile ? await uploadToCloudinary(imageFile, 'verticals/images') : null;
