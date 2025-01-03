@@ -104,7 +104,7 @@ export const getUniversityHierarchy = async (req, res) => {
 console.log(universityCards,'hi')
     res.status(200).json({
       success: true,
-      data: universityCards,
+      one: universityCards,
     });
   } catch (error) {
     console.error(error);
