@@ -3,12 +3,12 @@ import { addUniversityHierarchy, deleteData, editChapter, editModule, editUniver
 
 import multer from 'multer';
 
-const storage = multer.memoryStorage();
-const upload = multer({ storage });
+// const storage = multer.memoryStorage();
+// const upload = multer({ storage });
 
 const adminRouter = express.Router();
 
-adminRouter.post('/add-university-hierarchy',upload.any(), addUniversityHierarchy);
+adminRouter.post('/add-university-hierarchy', addUniversityHierarchy);
 adminRouter.get('/get-university-hierarchy', getUniversityHierarchy);
 adminRouter.put('/edit-university-card',editUniversityCard);
 adminRouter.put('/edit-module',editModule);
