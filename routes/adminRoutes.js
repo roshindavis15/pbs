@@ -47,7 +47,7 @@ const uploadMiddleware = (req, res, next) => {
       { name: 'moduleImage', maxCount: 1 },
       { name: 'icon', maxCount: 1 },
       { name: 'chapterImage', maxCount: 1 },
-      { name: 'pdfFile', maxCount: 1 }
+      { name: 'pdf', maxCount: 1 }
   ];
 
   const multipleUpload = upload.fields(uploadFields);
