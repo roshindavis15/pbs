@@ -10,7 +10,7 @@ cloudinary.config({
 });
 
 export const addUniversityHierarchy = async (req, res) => {
-  console.log(req.body,'req,body is this ')
+  console.log('req,body is this ')
   const { name, modules } = req.body;
   const files = req.files;
 
