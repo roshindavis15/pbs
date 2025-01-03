@@ -9,6 +9,7 @@ const allowedPDFTypes = ['application/pdf'];
 // Multer configuration
 const storage = multer.memoryStorage();
 
+
 // File filter function
 const fileFilter = (req, file, cb) => {
   // Check file type based on fieldname
@@ -30,7 +31,7 @@ const fileFilter = (req, file, cb) => {
   }
 };
 
-// Multer upload configuration
+
 const upload = multer({
   storage: storage,
   fileFilter: fileFilter,
@@ -40,10 +41,39 @@ const upload = multer({
   }
 });
 
-// Express router setup
+const uploadMiddleware = (req, res, next) => {
+  const uploadFields = [
+      { name: 'image1', maxCount: 1 },
+      { name: 'image2', maxCount: 1 },
+      { name: 'image3', maxCount: 1 },
+      { name: 'image4', maxCount: 1 },
+      { name: 'pdfFile', maxCount: 1 }
+  ];
+
+  const multipleUpload = upload.fields(uploadFields);
+
+  multipleUpload(req, res, function (err) {
+      if (err instanceof multer.MulterError) {
+          // Multer error handling
+          return res.status(400).json({
+              error: true,
+              message: `Upload error: ${err.message}`
+          });
+      } else if (err) {
+          // Other errors
+          return res.status(500).json({
+              error: true,
+              message: `Server error: ${err.message}`
+          });
+      }
+      // If successful, proceed to next middleware
+      next();
+  });
+};
+
 const adminRouter = express.Router();
 
-// Error handling middleware for multer
+
 const handleMulterError = (err, req, res, next) => {
   if (err instanceof multer.MulterError) {
     if (err.code === 'LIMIT_FILE_SIZE') {
@@ -62,7 +92,7 @@ const handleMulterError = (err, req, res, next) => {
 
 
 
-adminRouter.post('/add-university-hierarchy',upload.any(), addUniversityHierarchy);
+adminRouter.post('/add-university-hierarchy',uploadMiddleware, addUniversityHierarchy);
 adminRouter.get('/get-university-hierarchy', getUniversityHierarchy);
 adminRouter.put('/edit-university-card',editUniversityCard);
 adminRouter.put('/edit-module',editModule);
