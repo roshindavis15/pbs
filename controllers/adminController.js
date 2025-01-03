@@ -12,10 +12,9 @@ cloudinary.config({
 
 export const addUniversityHierarchy = async (req, res) => {
   console.log('req.body:', req.body);
-  const { name, modules } = req.body;
-  const files = req.files;
-
   try {
+    const { name, modules } = req.body;
+    const files = req.files;
     // Process Vertical icon and image
     const iconFile = files.find((file) => file.fieldname === 'icon');
     const imageFile = files.find((file) => file.fieldname === 'image');
