@@ -2,6 +2,7 @@ import { v2 as cloudinary } from 'cloudinary';
 import { UniversityCard, Module, Chapter, sequelize } from '../models/index.js';
 import { v4 as uuid } from 'uuid';
 import Vertical from '../models/universityCard.js';
+import uploadToCloudinary from '../config/cloudinary.js';
 
 
 cloudinary.config({
