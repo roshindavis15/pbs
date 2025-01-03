@@ -10,20 +10,20 @@ cloudinary.config({
 });
 
 export const addUniversityHierarchy = async (req, res) => {
-  console.log('req,body is this ')
+  console.log('req.body:', req.body);
   const { name, modules } = req.body;
   const files = req.files;
 
   try {
-    // Process UniversityCard icon and image
+    // Process Vertical icon and image
     const iconFile = files.find((file) => file.fieldname === 'icon');
     const imageFile = files.find((file) => file.fieldname === 'image');
 
-    const iconUrl = iconFile ? await uploadToCloudinary(iconFile, 'universityCard/icons') : null;
-    const imageUrl = imageFile ? await uploadToCloudinary(imageFile, 'universityCard/images') : null;
+    const iconUrl = iconFile ? await uploadToCloudinary(iconFile, 'verticals/icons') : null;
+    const imageUrl = imageFile ? await uploadToCloudinary(imageFile, 'verticals/images') : null;
 
-    // Create UniversityCard entry
-    const universityCard = await UniversityCard.create({
+    // Create Vertical entry
+    const vertical = await Vertical.create({
       name,
       icon: iconUrl,
       image: imageUrl,
@@ -32,7 +32,7 @@ export const addUniversityHierarchy = async (req, res) => {
     // Process each module
     for (const module of modules) {
       const moduleImageFile = files.find(
-        (file) => file.fieldname === `module_${module.name}_image`
+        (file) => file.fieldname === `moduleImage_${module.moduleName}`
       );
 
       const moduleImageUrl = moduleImageFile
@@ -40,45 +40,46 @@ export const addUniversityHierarchy = async (req, res) => {
         : null;
 
       const createdModule = await Module.create({
-        name: module.name,
-        image: moduleImageUrl,
-        universityCardId: universityCard.id,
+        moduleName: module.moduleName,
+        moduleImage: moduleImageUrl,
+        verticalId: vertical.id,
       });
 
       // Process each chapter in the module
-      for (const chapter of module.chapters) {
-        const chapterImageFile = files.find(
-          (file) => file.fieldname === `chapter_${chapter.name}_image`
-        );
+      if (module.chapters) {
+        for (const chapter of module.chapters) {
+          const chapterImageFile = files.find(
+            (file) => file.fieldname === `chapterImage_${chapter.chapterName}`
+          );
 
-        const chapterPdfFile = files.find(
-          (file) => file.fieldname === `chapter_${chapter.name}_pdf`
-        );
+          const pdfFile = files.find(
+            (file) => file.fieldname === `pdf_${chapter.chapterName}`
+          );
 
-        const chapterImageUrl = chapterImageFile
-          ? await uploadToCloudinary(chapterImageFile, 'chapters/images')
-          : null;
+          const chapterImageUrl = chapterImageFile
+            ? await uploadToCloudinary(chapterImageFile, 'chapters/images')
+            : null;
 
-        const chapterPdfUrl = chapterPdfFile
-          ? await uploadToCloudinary(chapterPdfFile, 'chapters/pdfs')
-          : null;
+          const pdfUrl = pdfFile
+            ? await uploadToCloudinary(pdfFile, 'chapters/pdfs')
+            : null;
 
-        await Chapter.create({
-          name: chapter.name,
-          summary: chapter.summary,
-          image: chapterImageUrl,
-          readingTime: chapter.readingTime,
-          pdf: chapterPdfUrl,
-          moduleId: createdModule.id,
-        });
+          await Chapter.create({
+            chapterName: chapter.chapterName,
+            summary: chapter.summary,
+            chapterImage: chapterImageUrl,
+            readingTime: chapter.readingTime,
+            pdf: pdfUrl,
+            moduleId: createdModule.id,
+          });
+        }
       }
     }
 
     res.status(200).json({ message: 'University hierarchy created successfully.' });
   } catch (error) {
-    console.error(error);
-    console.log('reached on catch block')
-    res.status(500).json({ message: 'An error found while creating the hierarchy.', error });
+    console.error('Error creating hierarchy:', error);
+    res.status(500).json({ message: 'An error occurred while creating the hierarchy.', error });
   }
 };
 
