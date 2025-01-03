@@ -80,7 +80,7 @@ export const addUniversityHierarchy = async (req, res) => {
     res.status(200).json({ message: 'University hierarchy created successfully.' });
   } catch (error) {
     console.error('Error creating hierarchy:', error);
-    res.status(500).json({ message: 'An error occurred while creating the hierarchy.', error });
+    res.status(500).json({ message: 'An error occurred while creating the hierarchy.', error.message });
   }
 };
 
