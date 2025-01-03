@@ -1,20 +1,14 @@
-import { v2 as cloudinary } from 'cloudinary';
 import { UniversityCard, Module, Chapter, sequelize } from '../models/index.js';
 import { v4 as uuid } from 'uuid';
 import Vertical from '../models/universityCard.js';
 import uploadToCloudinary from '../config/cloudinary.js';
 
 
-cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-  api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET,
-});
 
 export const addUniversityHierarchy = async (req, res) => {
   console.log('req.body:', req.body);
   try {
-    const { name } = req.body;
+    const { name , image , icon } = req.body;
     // Parse modules if it's a string
     const modules = typeof req.body.modules === 'string' ? JSON.parse(req.body.modules) : req.body.modules;
     
