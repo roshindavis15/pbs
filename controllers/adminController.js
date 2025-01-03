@@ -30,27 +30,33 @@ export const addUniversityHierarchy = async (req, res) => {
     const imageFile = findFile('image');
     console.log(iconFile,imageFile,'ho')
 
-    const iconUrl = iconFile ? await uploadToCloudinary(iconFile, 'verticals/icons') : null;
-    const imageUrl = imageFile ? await uploadToCloudinary(imageFile, 'verticals/images') : null;
 
-    // Create Vertical entry
-    const vertical = await Vertical.create({
-      name,
-      icon: iconUrl,
-      image: imageUrl,
-    });
+    const iconUrl = iconFile ? await uploadToCloudinary(iconFile, 'verticals/icons') : null;
+const imageUrl = imageFile ? await uploadToCloudinary(imageFile, 'verticals/images') : null;
+
+// Create Vertical entry with only the URL strings
+const vertical = await Vertical.create({
+  name,
+  icon: iconUrl?.inlineUrl || null,  // Store only the URL string
+  image: imageUrl?.inlineUrl || null, // Store only the URL string
+});
 
     // Process each module
     for (const module of modules) {
       const moduleImageFile = findFile(`moduleImage_${module.moduleName}`);
       
-      const moduleImageUrl = moduleImageFile 
-        ? await uploadToCloudinary(moduleImageFile, 'modules/images')
-        : null;
+      const moduleImageUrl = moduleImageFile
+  ? await uploadToCloudinary(moduleImageFile, 'modules/images')
+  : null;
 
+      // const createdModule = await Module.create({
+      //   moduleName: module.moduleName,
+      //   moduleImage: moduleImageUrl,
+      //   verticalId: vertical.id,
+      // });
       const createdModule = await Module.create({
         moduleName: module.moduleName,
-        moduleImage: moduleImageUrl,
+        moduleImage: moduleImageUrl?.inlineUrl || null,
         verticalId: vertical.id,
       });
 
@@ -61,19 +67,19 @@ export const addUniversityHierarchy = async (req, res) => {
           const pdfFile = findFile(`pdf_${chapter.chapterName}`);
 
           const chapterImageUrl = chapterImageFile
-            ? await uploadToCloudinary(chapterImageFile, 'chapters/images')
-            : null;
-
-          const pdfUrl = pdfFile
-            ? await uploadToCloudinary(pdfFile, 'chapters/pdfs')
-            : null;
+          ? await uploadToCloudinary(chapterImageFile, 'chapters/images')
+          : null;
+        
+        const pdfUrl = pdfFile
+          ? await uploadToCloudinary(pdfFile, 'chapters/pdfs')
+          : null;
 
           await Chapter.create({
             chapterName: chapter.chapterName,
             summary: chapter.summary,
-            chapterImage: chapterImageUrl,
+            chapterImage: chapterImageUrl?.inlineUrl || null,
             readingTime: chapter.readingTime,
-            pdf: pdfUrl,
+            pdf: pdfUrl?.inlineUrl || null,
             moduleId: createdModule.id,
           });
         }

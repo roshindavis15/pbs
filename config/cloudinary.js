@@ -37,22 +37,15 @@ const uploadToCloudinary = async (file, options = {}) => {
   const buffer = file.buffer || file;
 
   return new Promise((resolve, reject) => {
-    // Default upload options
-    const defaultOptions = {
+    const uploadOptions = {
       resource_type: "auto",
-      folder: "uploads",
+      folder: folder,
       quality: "auto",
       fetch_format: "auto",
       flags: "attachment"
     };
 
-    // Merge default options with provided options
-    const uploadOptions = {
-      ...defaultOptions,
-      ...options,
-    };
-
-    const uploadStream = cloudinary.uploader.upload_stream(
+    cloudinary.uploader.upload_stream(
       uploadOptions,
       (error, result) => {
         if (error) {
@@ -60,29 +53,23 @@ const uploadToCloudinary = async (file, options = {}) => {
           return reject(error);
         }
 
-        // Create both inline and download URLs
-        const inlineUrl = `${result.secure_url}?inline=true`;
-        const downloadUrl = `${result.secure_url}?attachment=true`;
-
-        resolve({
-          inlineUrl,
-          downloadUrl,
-          publicId: result.public_id,
-          format: result.format,
-          resourceType: result.resource_type,
-          ...result
-        });
+        if (returnFullObject) {
+          resolve({
+            inlineUrl: `${result.secure_url}?inline=true`,
+            downloadUrl: `${result.secure_url}?attachment=true`,
+            publicId: result.public_id,
+            format: result.format,
+            resourceType: result.resource_type,
+            ...result
+          });
+        } else {
+          resolve(`${result.secure_url}?inline=true`);
+        }
       }
-    );
-
-    try {
-      // Create read stream from buffer
-      streamifier.createReadStream(buffer).pipe(uploadStream);
-    } catch (error) {
-      console.error("Stream creation error:", error);
-      reject(error);
-    }
+    ).end(file.buffer);
   });
+
+
 };
 
 // Helper function to delete file from Cloudinary
