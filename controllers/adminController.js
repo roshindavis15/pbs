@@ -8,8 +8,8 @@ import uploadToCloudinary from '../config/cloudinary.js';
 export const addUniversityHierarchy = async (req, res) => {
   console.log('req.body:', req.body);
   try {
-    const metadata = req.body.metadata;
-    const { name } = metadata;
+    // const metadata = req.body.metadata;
+    const { name } = req.body;
     console.log("name:",name)
     // Parse modules if it's a string
     console.log('Raw modules:', req.body.modules);
