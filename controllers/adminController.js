@@ -97,6 +97,7 @@ const vertical = await Vertical.create({
 };
 
 export const getUniversityHierarchy = async (req, res) => {
+  console.log('hi')
   try {
     const universityCards = await UniversityCard.findAll({
       include: [
@@ -107,10 +108,10 @@ export const getUniversityHierarchy = async (req, res) => {
             {
               model: Chapter,
               as: 'chapters',
-              attributes: ['id', 'name', 'image', 'readingTime', 'pdf'],
+              attributes: ['id', 'chapterName', 'chapterImage', 'readingTime', 'pdf'],
             },
           ],
-          attributes: ['id', 'name', 'image'],
+          attributes: ['id', 'moduleName', 'moduleImage'],
         },
       ],
       attributes: ['id', 'name', 'icon', 'image'],
