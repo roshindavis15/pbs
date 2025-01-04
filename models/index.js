@@ -44,7 +44,7 @@ Chapter.belongsTo(Module, {
 export const initializeDatabase = async () => {
   try {
     console.log('Synchronizing database...');
-    await sequelize.sync(); // Sync models to the database schema
+    await sequelize.sync({force:true}); // Sync models to the database schema
     console.log('Database synchronized successfully.');
   } catch (error) {
     console.error('Database initialization error details:', error.message);
@@ -58,5 +58,4 @@ export {
   UniversityCard, 
   Module, 
   Chapter, 
-  
 };
