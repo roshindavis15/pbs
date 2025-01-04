@@ -38,8 +38,8 @@ const uploadToCloudinary = async (file, options = {}) => {
 
   return new Promise((resolve, reject) => {
     const uploadOptions = {
-      resource_type: "auto",
-      folder: folder,
+      resource_type: "raw",
+      // folder: folder,
       quality: "auto",
       fetch_format: "auto",
       flags: "attachment"
