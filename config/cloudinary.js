@@ -28,6 +28,9 @@ cloudinary.config({
 });
 
 const uploadToCloudinary = async (file, options = {}) => {
+  // Destructure options with default value for returnFullObject
+  const { returnFullObject = false, ...otherOptions } = options;
+
   // If no file is provided, return null
   if (!file) {
     return Promise.resolve(null);
@@ -39,10 +42,10 @@ const uploadToCloudinary = async (file, options = {}) => {
   return new Promise((resolve, reject) => {
     const uploadOptions = {
       resource_type: "raw",
-      // folder: folder,
       quality: "auto",
       fetch_format: "auto",
-      flags: "attachment"
+      flags: "attachment",
+      ...otherOptions  // Spread any additional options passed
     };
 
     cloudinary.uploader.upload_stream(
@@ -66,21 +69,8 @@ const uploadToCloudinary = async (file, options = {}) => {
           resolve(`${result.secure_url}?inline=true`);
         }
       }
-    ).end(file.buffer);
+    ).end(buffer);  // Use the correct buffer variable here
   });
-
-
 };
 
-// Helper function to delete file from Cloudinary
-// const deleteFromCloudinary = async (publicId, resourceType = 'image') => {
-//   try {
-//     const result = await cloudinary.uploader.destroy(publicId, { resource_type: resourceType });
-//     return result;
-//   } catch (error) {
-//     console.error("Cloudinary deletion error:", error);
-//     throw error;
-//   }
-// };
-
-export default uploadToCloudinary ;
+export default uploadToCloudinary;
