@@ -41,6 +41,7 @@ const upload = multer({
 });
 
 const uploadMiddleware = (req, res, next) => {
+  console.log('reaches on multer')
   const uploadFields = [
       { name: 'image', maxCount: 1 },
       { name: 'moduleImage', maxCount: 1 },
@@ -48,8 +49,11 @@ const uploadMiddleware = (req, res, next) => {
       { name: 'chapterImage', maxCount: 1 },
       { name: 'pdf', maxCount: 1 }
   ];
+  console.log("uploadMiddleware:",uploadMiddleware);
 
   const multipleUpload = upload.fields(uploadFields);
+
+  console.log("multipleUpload:",multipleUpload)
 
   multipleUpload(req, res, function (err) {
       if (err instanceof multer.MulterError) {

@@ -8,8 +8,11 @@ import uploadToCloudinary from '../config/cloudinary.js';
 export const addUniversityHierarchy = async (req, res) => {
   console.log('req.body:', req.body);
   try {
-    const { name  } = req.body;
+    const metadata = JSON.parse(req.body.metadata);
+    const { name } = metadata;
+    console.log("name:",name)
     // Parse modules if it's a string
+    console.log('Raw modules:', req.body.modules);
     const modules = typeof req.body.modules === 'string' ? JSON.parse(req.body.modules) : req.body.modules;
     
     // Handle files safely
@@ -32,14 +35,18 @@ export const addUniversityHierarchy = async (req, res) => {
 
 
     const iconUrl = iconFile ? await uploadToCloudinary(iconFile, 'verticals/icons') : null;
+    console.log("iconUrl:",iconUrl);
 const imageUrl = imageFile ? await uploadToCloudinary(imageFile, 'verticals/images') : null;
 
 // Create Vertical entry with only the URL strings
+console.log('one1')
 const vertical = await Vertical.create({
   name,
   icon: iconUrl?.inlineUrl || null,  // Store only the URL string
   image: imageUrl?.inlineUrl || null, // Store only the URL string
 });
+
+console.log('one')
 
     // Process each module
     for (const module of modules) {
@@ -59,7 +66,7 @@ const vertical = await Vertical.create({
         moduleImage: moduleImageUrl?.inlineUrl || null,
         verticalId: vertical.id,
       });
-
+      console.log('two')
       // Process each chapter in the module
       if (module.chapters && Array.isArray(module.chapters)) {
         for (const chapter of module.chapters) {
@@ -73,7 +80,7 @@ const vertical = await Vertical.create({
         const pdfUrl = pdfFile
           ? await uploadToCloudinary(pdfFile, 'chapters/pdfs')
           : null;
-
+          console.log('three')
           await Chapter.create({
             chapterName: chapter.chapterName,
             summary: chapter.summary,
@@ -97,7 +104,7 @@ const vertical = await Vertical.create({
 };
 
 export const getUniversityHierarchy = async (req, res) => {
-  console.log('hi')
+
   try {
     const universityCards = await UniversityCard.findAll({
       include: [
