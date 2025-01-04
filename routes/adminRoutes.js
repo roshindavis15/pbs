@@ -9,19 +9,18 @@ const allowedPDFTypes = ['application/pdf'];
 // Multer configuration
 const storage = multer.memoryStorage();
 
-
 // File filter function
 const fileFilter = (req, file, cb) => {
   // Check file type based on fieldname
   if (file.fieldname === 'icon' || 
       file.fieldname === 'image' || 
-      file.fieldname.startsWith('moduleImage_') ||
-      file.fieldname.startsWith('chapterImage_')) {
+      file.fieldname.startsWith('moduleImage') ||
+      file.fieldname.startsWith('chapterImage')) {
     if (!allowedImageTypes.includes(file.mimetype)) {
       return cb(new Error('Only jpeg, jpg, png, and gif images are allowed!'), false);
     }
     cb(null, true);
-  } else if (file.fieldname.startsWith('pdf_')) {
+  } else if (file.fieldname.startsWith('pdf')) {
     if (!allowedPDFTypes.includes(file.mimetype)) {
       return cb(new Error('Only PDF files are allowed!'), false);
     }
