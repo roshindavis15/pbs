@@ -1,19 +1,19 @@
 // models/index.js
 import sequelize from '../config/db.js'; 
-import UniversityCard from './universityCard.js';
+import Vertical from './vertical.js';
 import Module from './module.js';
 import Chapter from './chapter.js';
 
 // Remove the associations from individual model files first
 
 // Define all associations here
-UniversityCard.hasMany(Module, { 
-    foreignKey: 'universityCardId', 
+Vertical.hasMany(Module, { 
+    foreignKey: 'verticalId', 
     as: 'modules' 
 });
 
-Module.belongsTo(UniversityCard, { 
-    foreignKey: 'universityCardId'
+Module.belongsTo(Vertical, { 
+    foreignKey: 'verticalId'
 });
 
 Module.hasMany(Chapter, { 
@@ -55,7 +55,7 @@ export const initializeDatabase = async () => {
 
 export { 
   sequelize, 
-  UniversityCard, 
+  Vertical, 
   Module, 
   Chapter, 
 };

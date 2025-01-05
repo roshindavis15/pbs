@@ -1,6 +1,5 @@
-import { UniversityCard, Module, Chapter, sequelize } from '../models/index.js';
+import { Vertical, Module, Chapter, sequelize } from '../models/index.js';
 import { v4 as uuid } from 'uuid';
-import Vertical from '../models/universityCard.js';
 import uploadToCloudinary from '../config/cloudinary.js';
 
 
@@ -94,7 +93,7 @@ export const addUniversityHierarchy = async (req, res) => {
 export const getUniversityHierarchy = async (req, res) => {
 
   try {
-    const universityCards = await UniversityCard.findAll({
+    const vertical = await Vertical.findAll({
       include: [
         {
           model: Module,
@@ -111,10 +110,10 @@ export const getUniversityHierarchy = async (req, res) => {
       ],
       attributes: ['id', 'name', 'icon', 'image'],
     });
-console.log(universityCards,'hi')
+console.log(vertical,'hi')
     res.status(200).json({
       msg:"successful",
-      one: universityCards,
+      one: vertical,
     });
   } catch (error) {
     console.error(error);
