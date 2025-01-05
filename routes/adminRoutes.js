@@ -24,15 +24,17 @@ const fileFilter = (req, file, cb) => {
   if (
     file.fieldname === 'icon' ||
     file.fieldname === 'image' ||
-    file.fieldname.startsWith('moduleImage') ||
-    file.fieldname.startsWith('chapterImage')
+    file.fieldname === 'moduleImage' ||
+    file.fieldname === 'chapterImage' 
+    // file.fieldname.startsWith('moduleImage') ||
+    // file.fieldname.startsWith('chapterImage')
   ) {
     if (!allowedImageTypes.includes(file.mimetype)) {
       console.error('Rejected image file:', file.fieldname, 'Invalid mimetype:', file.mimetype);
       return cb(new Error('Only jpeg, jpg, png, gif, and webp images are allowed!'), false);
     }
     cb(null, true);
-  } else if (file.fieldname.startsWith('pdf')) {
+  } else if (file.fieldname === 'pdf') {
     if (!allowedPDFTypes.includes(file.mimetype)) {
       console.error('Rejected PDF file:', file.fieldname, 'Invalid mimetype:', file.mimetype);
       return cb(new Error('Only PDF files are allowed!'), false);
@@ -81,14 +83,14 @@ const createUploadMiddleware = (req, res, next) => {
 
   if (modulesData) {
     modulesData.forEach((module) => {
-      const moduleFieldName = `moduleImage_${module.moduleName}`;
+      const moduleFieldName = `moduleImage`;
       uploadFields.push({ name: moduleFieldName, maxCount: 1 });
       console.log('Added module field:', moduleFieldName);
 
       if (module.chapters) {
         module.chapters.forEach((chapter) => {
-          const chapterImageFieldName = `chapterImage_${chapter.chapterName}`;
-          const pdfFieldName = `pdf_${chapter.chapterName}`;
+          const chapterImageFieldName = `chapterImage`;
+          const pdfFieldName = `pdf`;
           uploadFields.push({ name: chapterImageFieldName, maxCount: 1 });
           uploadFields.push({ name: pdfFieldName, maxCount: 1 });
           console.log('Added chapter fields:', { chapterImageFieldName, pdfFieldName });
