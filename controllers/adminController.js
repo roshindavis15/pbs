@@ -42,10 +42,12 @@ export const addUniversityHierarchy = async (req, res) => {
     // Process each module
     for (const module of modules) {
       const moduleImageFile = findFile(`moduleImage_${module.moduleName}`);
+      console.log("moduleImageFile:",moduleImageFile);
       
       const moduleImageUpload = moduleImageFile
         ? await uploadToCloudinary(moduleImageFile, 'modules/images')
         : null;
+        console.log("moduleImageUpload:",moduleImageUpload);
 
       const createdModule = await Module.create({
         moduleName: module.moduleName,
@@ -57,7 +59,9 @@ export const addUniversityHierarchy = async (req, res) => {
       if (module.chapters && Array.isArray(module.chapters)) {
         for (const chapter of module.chapters) {
           const chapterImageFile = findFile(`chapterImage_${chapter.chapterName}`);
+          console.log("chapterImageFile:",chapterImageFile);
           const pdfFile = findFile(`pdf_${chapter.chapterName}`);
+          console.log("pdfFile:",pdfFile);
 
           const [chapterImageUpload, pdfUpload] = await Promise.all([
             chapterImageFile ? uploadToCloudinary(chapterImageFile, 'chapters/images') : null,
