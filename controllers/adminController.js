@@ -42,6 +42,7 @@ export const addUniversityHierarchy = async (req, res) => {
     // Process each module
     for (const module of modules) {
       const moduleImageFile = findFile(`moduleImage_${module.moduleName}`);
+      console.log("reached here")
       console.log("moduleImageFile:",moduleImageFile);
       
       const moduleImageUpload = moduleImageFile
