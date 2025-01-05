@@ -18,7 +18,7 @@ const storage = multer.memoryStorage();
 
 // File filter function
 const fileFilter = (req, file, cb) => {
-  console.log('Processing file:', { fieldname: file.fieldname, mimetype: file.mimetype });
+  // console.log('Processing file:', { fieldname: file.fieldname, mimetype: file.mimetype });
 
   // Validate file type based on field name
   if (
@@ -58,7 +58,7 @@ const upload = multer({
 
 // Middleware to dynamically handle file uploads
 const createUploadMiddleware = (req, res, next) => {
-  console.log('A. Starting upload middleware');
+  // console.log('A. Starting upload middleware');
 
   let modulesData;
   try {
@@ -121,9 +121,9 @@ const createUploadMiddleware = (req, res, next) => {
       });
     }
 
-    console.log('M. Files successfully uploaded:', Object.keys(req.files || {}));
-    console.log('N. Detailed file data:', JSON.stringify(req.files, null, 2));
-    console.log('O. Body after upload:', req.body);
+    // console.log('M. Files successfully uploaded:', Object.keys(req.files || {}));
+    // console.log('N. Detailed file data:', JSON.stringify(req.files, null, 2));
+    // console.log('O. Body after upload:', req.body);
 
     // Proceed to the next middleware
     next();
