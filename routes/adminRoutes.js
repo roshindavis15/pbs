@@ -79,28 +79,25 @@ const createUploadMiddleware = (req, res, next) => {
   const uploadFields = [
     { name: 'icon', maxCount: 1 },
     { name: 'image', maxCount: 1 },
-    { name: 'moduleImage', maxCount: 1 },
-    { name: 'chapterImage', maxCount: 1 },
-    { name: 'pdf', maxCount: 1 },
   ];
 
-  // if (modulesData) {
-  //   modulesData.forEach((module) => {
-  //     const moduleFieldName = `moduleImage`;
-  //     uploadFields.push({ name: moduleFieldName, maxCount: 1 });
-  //     console.log('Added module field:', moduleFieldName);
+  if (modulesData) {
+    modulesData.forEach((module) => {
+      const moduleFieldName = `moduleImage`;
+      uploadFields.push({ name: moduleFieldName, maxCount: 1 });
+      console.log('Added module field:', moduleFieldName);
 
-  //     if (module.chapters) {
-  //       module.chapters.forEach((chapter) => {
-  //         const chapterImageFieldName = `chapterImage`;
-  //         const pdfFieldName = `pdf`;
-  //         uploadFields.push({ name: chapterImageFieldName, maxCount: 1 });
-  //         uploadFields.push({ name: pdfFieldName, maxCount: 1 });
-  //         console.log('Added chapter fields:', { chapterImageFieldName, pdfFieldName });
-  //       });
-  //     }
-  //   });
-  // }
+      if (module.chapters) {
+        module.chapters.forEach((chapter) => {
+          const chapterImageFieldName = `chapterImage`;
+          const pdfFieldName = `pdf`;
+          uploadFields.push({ name: chapterImageFieldName, maxCount: 1 });
+          uploadFields.push({ name: pdfFieldName, maxCount: 1 });
+          console.log('Added chapter fields:', { chapterImageFieldName, pdfFieldName });
+        });
+      }
+    });
+  }
 
   console.log('E. Configured upload fields:', uploadFields);
 
