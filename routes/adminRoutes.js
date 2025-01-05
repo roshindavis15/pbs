@@ -1,83 +1,92 @@
 import express from 'express';
-import { addUniversityHierarchy, deleteData, editChapter, editModule, editUniversityCard, getUniversityHierarchy } from '../controllers/adminController.js';
+import {
+  addUniversityHierarchy,
+  deleteData,
+  editChapter,
+  editModule,
+  editUniversityCard,
+  getUniversityHierarchy,
+} from '../controllers/adminController.js';
 import multer from 'multer';
 
+// Allowed MIME types for validation
 const allowedImageTypes = ['image/jpeg', 'image/png', 'image/jpg', 'image/gif', 'image/webp'];
 const allowedPDFTypes = ['application/pdf'];
 
-// Multer configuration
+// Multer storage configuration
 const storage = multer.memoryStorage();
 
-// File filter function with logging
+// File filter function
 const fileFilter = (req, file, cb) => {
-  console.log('Processing file:', {
-    fieldname: file.fieldname,
-    mimetype: file.mimetype
-  });
+  console.log('Processing file:', { fieldname: file.fieldname, mimetype: file.mimetype });
 
-  // Check file type based on fieldname
-  if (file.fieldname === 'icon' || 
-      file.fieldname === 'image' || 
-      file.fieldname.startsWith('moduleImage') ||
-      file.fieldname.startsWith('chapterImage')) {
+  // Validate file type based on field name
+  if (
+    file.fieldname === 'icon' ||
+    file.fieldname === 'image' ||
+    file.fieldname.startsWith('moduleImage') ||
+    file.fieldname.startsWith('chapterImage')
+  ) {
     if (!allowedImageTypes.includes(file.mimetype)) {
-      console.log('Rejected image file:', file.fieldname, 'Invalid mimetype:', file.mimetype);
-      return cb(new Error('Only jpeg, jpg, png, and gif images are allowed!'), false);
+      console.error('Rejected image file:', file.fieldname, 'Invalid mimetype:', file.mimetype);
+      return cb(new Error('Only jpeg, jpg, png, gif, and webp images are allowed!'), false);
     }
-    console.log('Accepted image file:', file.fieldname);
     cb(null, true);
   } else if (file.fieldname.startsWith('pdf')) {
     if (!allowedPDFTypes.includes(file.mimetype)) {
-      console.log('Rejected PDF file:', file.fieldname, 'Invalid mimetype:', file.mimetype);
+      console.error('Rejected PDF file:', file.fieldname, 'Invalid mimetype:', file.mimetype);
       return cb(new Error('Only PDF files are allowed!'), false);
     }
-    console.log('Accepted PDF file:', file.fieldname);
     cb(null, true);
   } else {
-    console.log('Rejected file - unexpected field:', file.fieldname);
+    console.error('Rejected file - unexpected field:', file.fieldname);
     cb(new Error('Unexpected field!'), false);
   }
 };
 
+// Multer upload configuration
 const upload = multer({
   storage: storage,
   fileFilter: fileFilter,
   limits: {
-    fileSize: 5 * 1024 * 1024, // 5MB limit
-    files: 20 // Maximum number of files
-  }
+    fileSize: 5 * 1024 * 1024, // 5MB per file
+    files: 20, // Max number of files
+  },
 });
 
+// Middleware to dynamically handle file uploads
 const createUploadMiddleware = (req, res, next) => {
   console.log('A. Starting upload middleware');
-  console.log('B. Request body before parse:', req.body);
-  
-  // If modules is a string, parse it
+
   let modulesData;
   try {
-    modulesData = typeof req.body.modules === 'string' 
-      ? JSON.parse(req.body.modules) 
+    // Parse modules data from request body
+    modulesData = typeof req.body.modules === 'string'
+      ? JSON.parse(req.body.modules)
       : req.body.modules;
     console.log('C. Parsed modules data:', modulesData);
   } catch (error) {
-    console.error('D. Error parsing modules:', error);
+    console.error('D. Error parsing modules data:', error);
+    return res.status(400).json({
+      error: true,
+      message: 'Invalid modules data in request body!',
+    });
   }
 
-  // Create upload fields dynamically
+  // Create upload fields
   const uploadFields = [
     { name: 'icon', maxCount: 1 },
-    { name: 'image', maxCount: 1 }
+    { name: 'image', maxCount: 1 },
   ];
 
-  // Add fields for modules and chapters
   if (modulesData) {
-    modulesData.forEach(module => {
+    modulesData.forEach((module) => {
       const moduleFieldName = `moduleImage_${module.moduleName}`;
       uploadFields.push({ name: moduleFieldName, maxCount: 1 });
       console.log('Added module field:', moduleFieldName);
 
       if (module.chapters) {
-        module.chapters.forEach(chapter => {
+        module.chapters.forEach((chapter) => {
           const chapterImageFieldName = `chapterImage_${chapter.chapterName}`;
           const pdfFieldName = `pdf_${chapter.chapterName}`;
           uploadFields.push({ name: chapterImageFieldName, maxCount: 1 });
@@ -91,35 +100,27 @@ const createUploadMiddleware = (req, res, next) => {
   console.log('E. Configured upload fields:', uploadFields);
 
   const multipleUpload = upload.fields(uploadFields);
-  console.log('F. Created upload middleware');
 
-  multipleUpload(req, res, function(err) {
-    console.log('Raw req.body:', req.body);
-    console.log('Raw req.files:', req.files);
-    console.log('Parsed modules data:', req.body.modules);
-    
-    console.log('G. Inside upload callback');
-    console.log('H. Files received:', Object.keys(req.files || {}));
-    console.log('I. Detailed files:', JSON.stringify(req.files, null, 2));
-    console.log('J. Body after upload:', req.body);
-    
+  multipleUpload(req, res, (err) => {
     if (err instanceof multer.MulterError) {
       console.error('K. Multer error:', err);
       return res.status(400).json({
         error: true,
         message: `Upload error: ${err.message}`,
-        details: err
       });
     } else if (err) {
-      console.error('L. Other error:', err);
+      console.error('L. Unexpected error:', err);
       return res.status(500).json({
         error: true,
         message: `Server error: ${err.message}`,
-        details: err
       });
     }
-    
-    console.log('M. Upload successful, moving to next middleware');
+
+    console.log('M. Files successfully uploaded:', Object.keys(req.files || {}));
+    console.log('N. Detailed file data:', JSON.stringify(req.files, null, 2));
+    console.log('O. Body after upload:', req.body);
+
+    // Proceed to the next middleware
     next();
   });
 };
@@ -135,5 +136,4 @@ adminRouter.put('/edit-module', editModule);
 adminRouter.put('/edit-chapter', editChapter);
 adminRouter.delete('/delete-data', deleteData);
 
-// Single default export
-export default adminRouter;
+export default adminRouter; // Ensure this is the only default export
