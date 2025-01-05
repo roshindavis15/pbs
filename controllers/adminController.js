@@ -6,19 +6,13 @@ import uploadToCloudinary from '../config/cloudinary.js';
 
 
 export const addUniversityHierarchy = async (req, res) => {
-  console.log('req.body:', req.body);
   try {
-    // const metadata = req.body.metadata;
     const { name } = req.body;
-    console.log("name:",name)
-    // Parse modules if it's a string
-    console.log('Raw modules:', req.body.modules);
     const modules = typeof req.body.modules === 'string' ? JSON.parse(req.body.modules) : req.body.modules;
     
     // Handle files safely
     const files = req.files || {};
     
-    // Helper function to find file
     const findFile = (fieldname) => {
       if (Array.isArray(files)) {
         return files.find(file => file.fieldname === fieldname);
@@ -31,62 +25,51 @@ export const addUniversityHierarchy = async (req, res) => {
     // Process Vertical icon and image
     const iconFile = findFile('icon');
     const imageFile = findFile('image');
-    console.log(iconFile,imageFile,'ho')
 
+    // Upload files to Cloudinary
+    const [iconUpload, imageUpload] = await Promise.all([
+      iconFile ? uploadToCloudinary(iconFile, 'verticals/icons') : null,
+      imageFile ? uploadToCloudinary(imageFile, 'verticals/images') : null
+    ]);
 
-    const iconUrl = iconFile ? await uploadToCloudinary(iconFile, 'verticals/icons') : null;
-    console.log("iconUrl:",iconUrl);
-const imageUrl = imageFile ? await uploadToCloudinary(imageFile, 'verticals/images') : null;
-
-// Create Vertical entry with only the URL strings
-console.log('one1')
-const vertical = await Vertical.create({
-  name,
-  icon: iconUrl?.inlineUrl || null,  // Store only the URL string
-  image: imageUrl?.inlineUrl || null, // Store only the URL string
-});
-
-console.log('one')
+    // Create Vertical entry
+    const vertical = await Vertical.create({
+      name,
+      icon: iconUpload?.inlineUrl || null,
+      image: imageUpload?.inlineUrl || null,
+    });
 
     // Process each module
     for (const module of modules) {
       const moduleImageFile = findFile(`moduleImage_${module.moduleName}`);
       
-      const moduleImageUrl = moduleImageFile
-  ? await uploadToCloudinary(moduleImageFile, 'modules/images')
-  : null;
+      const moduleImageUpload = moduleImageFile
+        ? await uploadToCloudinary(moduleImageFile, 'modules/images')
+        : null;
 
-      // const createdModule = await Module.create({
-      //   moduleName: module.moduleName,
-      //   moduleImage: moduleImageUrl,
-      //   verticalId: vertical.id,
-      // });
       const createdModule = await Module.create({
         moduleName: module.moduleName,
-        moduleImage: moduleImageUrl?.inlineUrl || null,
+        moduleImage: moduleImageUpload?.inlineUrl || null,
         verticalId: vertical.id,
       });
-      console.log('two')
+
       // Process each chapter in the module
       if (module.chapters && Array.isArray(module.chapters)) {
         for (const chapter of module.chapters) {
           const chapterImageFile = findFile(`chapterImage_${chapter.chapterName}`);
           const pdfFile = findFile(`pdf_${chapter.chapterName}`);
 
-          const chapterImageUrl = chapterImageFile
-          ? await uploadToCloudinary(chapterImageFile, 'chapters/images')
-          : null;
-        
-        const pdfUrl = pdfFile
-          ? await uploadToCloudinary(pdfFile, 'chapters/pdfs')
-          : null;
-          console.log('three')
+          const [chapterImageUpload, pdfUpload] = await Promise.all([
+            chapterImageFile ? uploadToCloudinary(chapterImageFile, 'chapters/images') : null,
+            pdfFile ? uploadToCloudinary(pdfFile, 'chapters/pdfs') : null
+          ]);
+
           await Chapter.create({
             chapterName: chapter.chapterName,
             summary: chapter.summary,
-            chapterImage: chapterImageUrl?.inlineUrl || null,
+            chapterImage: chapterImageUpload?.inlineUrl || null,
             readingTime: chapter.readingTime,
-            pdf: pdfUrl?.inlineUrl || null,
+            pdf: pdfUpload?.inlineUrl || null,
             moduleId: createdModule.id,
           });
         }
