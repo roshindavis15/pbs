@@ -94,6 +94,10 @@ const createUploadMiddleware = (req, res, next) => {
   console.log('F. Created upload middleware');
 
   multipleUpload(req, res, function(err) {
+    console.log('Raw req.body:', req.body);
+    console.log('Raw req.files:', req.files);
+    console.log('Parsed modules data:', req.body.modules);
+    
     console.log('G. Inside upload callback');
     console.log('H. Files received:', Object.keys(req.files || {}));
     console.log('I. Detailed files:', JSON.stringify(req.files, null, 2));
