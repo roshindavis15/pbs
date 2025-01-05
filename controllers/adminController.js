@@ -63,7 +63,7 @@ export const addUniversityHierarchy = async (req, res) => {
             chapterImageFile ? uploadToCloudinary(chapterImageFile, 'chapters/images') : null,
             pdfFile ? uploadToCloudinary(pdfFile, 'chapters/pdfs') : null
           ]);
-          console.log("chapter image url:",chapterImageUpload.inlineUrl);
+          console.log("chapter image url:",chapterImageUpload);
           await Chapter.create({
             chapterName: chapter.chapterName,
             summary: chapter.summary,
