@@ -18,8 +18,8 @@ const fileFilter = (req, file, cb) => {
 
   // Check if field name matches our expected patterns
   if (file.fieldname === 'icon' || file.fieldname === 'image' || 
-      file.fieldname.startsWith('moduleImage_') || 
-      file.fieldname.startsWith('chapterImage_')) {
+      file.fieldname.startsWith('moduleImage') || 
+      file.fieldname.startsWith('chapterImage')) {
     
     if (!allowedImageTypes.includes(file.mimetype)) {
       return cb(new Error('Invalid image type'), false);
@@ -27,7 +27,7 @@ const fileFilter = (req, file, cb) => {
     return cb(null, true);
   }
   
-  if (file.fieldname.startsWith('pdf_')) {
+  if (file.fieldname.startsWith('pdf')) {
     if (!allowedPDFTypes.includes(file.mimetype)) {
       return cb(new Error('Invalid PDF type'), false);
     }
