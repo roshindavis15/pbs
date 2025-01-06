@@ -12,6 +12,7 @@ import multer from 'multer';
 const storage = multer.memoryStorage();
 
 const fileFilter = (req, file, cb) => {
+  console.log(req.file)
   const allowedImageTypes = ['image/jpeg', 'image/png', 'image/jpg', 'image/gif', 'image/webp'];
   const allowedPDFTypes = ['application/pdf'];
 
@@ -29,7 +30,7 @@ const fileFilter = (req, file, cb) => {
 };
 
 const createUploadMiddleware = (req, res, next) => {
-  console.log(req.body,'----------')
+  console.log(req.files,'----------')
   const upload = multer({
     storage,
     fileFilter,
@@ -43,7 +44,7 @@ const createUploadMiddleware = (req, res, next) => {
     { name: 'icon', maxCount: 1 },
     { name: 'image', maxCount: 1 }
   ];
-
+  console.log(req.body.modulesCount,'>>>>>>>')
   const modulesCount = parseInt(req.body.modulesCount) || 10;
   
   for (let i = 0; i < modulesCount; i++) {
@@ -55,9 +56,12 @@ const createUploadMiddleware = (req, res, next) => {
       fields.push({ name: `modules[${i}][chapters][${j}][pdf]`, maxCount: 1 });
     }
   }
+  fields.forEach((item)=>{
+    console.log(item,'@@@@@@@@@@@')
+  })
 
   upload.fields(fields)(req, res, (err) => {
-    console.log(req,'****')
+    console.log(req.files,'****')
     if (err instanceof multer.MulterError) {
       return res.status(400).json({ error: true, message: `Upload error: ${err.message}` });
     }
