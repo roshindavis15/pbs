@@ -10,7 +10,7 @@ export const addUniversityHierarchy = async (req, res) => {
     const modules = typeof req.body.modules === 'string' ? JSON.parse(req.body.modules) : req.body.modules;
     const files = req.files || {};
 
-    // Process Vertical icon and image
+  
     const iconFile = files['icon']?.[0];
     const imageFile = files['image']?.[0];
 
@@ -25,7 +25,7 @@ export const addUniversityHierarchy = async (req, res) => {
       image: imageUpload?.inlineUrl || null,
     });
 
-    // Process each module
+  
     for (let i = 0; i < modules.length; i++) {
       const module = modules[i];
       const moduleImageFile = files[`modules[${i}][moduleImage]`]?.[0];
@@ -40,7 +40,6 @@ export const addUniversityHierarchy = async (req, res) => {
         verticalId: vertical.id,
       });
 
-      // Process each chapter in the module
       if (module.chapters && Array.isArray(module.chapters)) {
         for (let j = 0; j < module.chapters.length; j++) {
           const chapter = module.chapters[j];
@@ -203,10 +202,10 @@ export const deleteData = async (req, res) => {
   console.log("id:", id);
 
   try {
-    // Check if it's a UniversityCard
+   
     const universityCard = await UniversityCard.findByPk(id);
     if (universityCard) {
-      // Delete related modules and chapters
+     
       await Module.destroy({
         where: { universityCardId: id },
       });
@@ -216,10 +215,10 @@ export const deleteData = async (req, res) => {
       return res.status(200).json({ message: 'University card and related modules deleted successfully.' });
     }
 
-    // Check if it's a Module
+   
     const module = await Module.findByPk(id);
     if (module) {
-      // Delete related chapters
+   
       await Chapter.destroy({
         where: { moduleId: id },
       });
@@ -229,7 +228,6 @@ export const deleteData = async (req, res) => {
       return res.status(200).json({ message: 'Module and related chapters deleted successfully.' });
     }
 
-    // Check if it's a Chapter
     const chapter = await Chapter.findByPk(id);
     if (chapter) {
       await Chapter.destroy({
