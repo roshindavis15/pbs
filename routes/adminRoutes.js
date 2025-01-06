@@ -30,7 +30,15 @@
   };
 
   const createUploadMiddleware = (req, res, next) => {
-    
+    console.log(req.body.modules,'req.body.modules1111')
+    console.log(req.body,'req.body000000')
+    let modulesData;
+    try {
+      modulesData = typeof req.body.modules === 'string' ? JSON.parse(req.body.modules) : req.body.modules;
+    } catch (error) {
+      return res.status(400).json({ error: true, message: 'Invalid modules data format' });
+    }
+
     const upload = multer({
       storage,
       fileFilter,
@@ -45,18 +53,40 @@
       { name: 'image', maxCount: 1 }
     ];
 
-    const modulesCount = parseInt(req.body.modulesCount) || 2;
+    // const modulesCount = parseInt(req.body.modulesCount) || 2;
     
-    for (let i = 0; i < modulesCount; i++) {
-      fields.push({ name: `modules[${i}][moduleImage]`, maxCount: 1 });
+    // for (let i = 0; i < modulesCount; i++) {
+    //   fields.push({ name: `modules[${i}][moduleImage]`, maxCount: 1 });
       
-      const chaptersCount = parseInt(req.body[`modules[${i}][chaptersCount]`]) || 2;
-      for (let j = 0; j < chaptersCount; j++) {
-        fields.push({ name: `modules[${i}][chapters][${j}][chapterImage]`, maxCount: 1 });
-        fields.push({ name: `modules[${i}][chapters][${j}][pdf]`, maxCount: 1 });
-      }
-    }
+    //   const chaptersCount = parseInt(req.body[`modules[${i}][chaptersCount]`]) || 2;
+    //   for (let j = 0; j < chaptersCount; j++) {
+    //     fields.push({ name: `modules[${i}][chapters][${j}][chapterImage]`, maxCount: 1 });
+    //     fields.push({ name: `modules[${i}][chapters][${j}][pdf]`, maxCount: 1 });
+    //   }
+    // }
 
+    if (Array.isArray(modulesData)) {
+      modulesData.forEach((module, moduleIndex) => {
+        fields.push({ 
+          name: `modules[${moduleIndex}][moduleImage]`, 
+          maxCount: 1 
+        });
+  
+        // Add fields for chapters if they exist
+        if (Array.isArray(module.chapters)) {
+          module.chapters.forEach((_, chapterIndex) => {
+            fields.push({ 
+              name: `modules[${moduleIndex}][chapters][${chapterIndex}][chapterImage]`, 
+              maxCount: 1 
+            });
+            fields.push({ 
+              name: `modules[${moduleIndex}][chapters][${chapterIndex}][pdf]`, 
+              maxCount: 1 
+            });
+          });
+        }
+      });
+    }
 
     upload.fields(fields)(req, res, (err) => {
       console.log(req.files,'^^^^^^^^^^^^^^^^^^')
