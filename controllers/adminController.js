@@ -8,30 +8,17 @@ export const addUniversityHierarchy = async (req, res) => {
   try {
     const { name } = req.body;
     const modules = typeof req.body.modules === 'string' ? JSON.parse(req.body.modules) : req.body.modules;
-    
-    // Handle files safely
     const files = req.files || {};
-    
-    const findFile = (fieldname) => {
-      if (Array.isArray(files)) {
-        return files.find(file => file.fieldname === fieldname);
-      } else if (typeof files === 'object') {
-        return files[fieldname]?.[0];
-      }
-      return null;
-    };
 
     // Process Vertical icon and image
-    const iconFile = findFile('icon');
-    const imageFile = findFile('image');
+    const iconFile = files['icon']?.[0];
+    const imageFile = files['image']?.[0];
 
-    // Upload files to Cloudinary
     const [iconUpload, imageUpload] = await Promise.all([
       iconFile ? uploadToCloudinary(iconFile, 'verticals/icons') : null,
       imageFile ? uploadToCloudinary(imageFile, 'verticals/images') : null
     ]);
 
-    // Create Vertical entry
     const vertical = await Vertical.create({
       name,
       icon: iconUpload?.inlineUrl || null,
@@ -39,15 +26,13 @@ export const addUniversityHierarchy = async (req, res) => {
     });
 
     // Process each module
-    for (const module of modules) {
-      const moduleImageFile = findFile(`moduleImage_${module.moduleName}`);
-      console.log("reached here")
-      console.log("moduleImageFile:",moduleImageFile);
+    for (let i = 0; i < modules.length; i++) {
+      const module = modules[i];
+      const moduleImageFile = files[`modules[${i}][moduleImage]`]?.[0];
       
       const moduleImageUpload = moduleImageFile
         ? await uploadToCloudinary(moduleImageFile, 'modules/images')
         : null;
-        // console.log("moduleImageUpload:",moduleImageUpload);
 
       const createdModule = await Module.create({
         moduleName: module.moduleName,
@@ -57,17 +42,16 @@ export const addUniversityHierarchy = async (req, res) => {
 
       // Process each chapter in the module
       if (module.chapters && Array.isArray(module.chapters)) {
-        for (const chapter of module.chapters) {
-          const chapterImageFile = findFile(`chapterImage_${chapter.chapterName}`);
-          console.log("chapterImageFile:",chapterImageFile);
-          const pdfFile = findFile(`pdf_${chapter.chapterName}`);
-          console.log("pdfFile:",pdfFile);
+        for (let j = 0; j < module.chapters.length; j++) {
+          const chapter = module.chapters[j];
+          const chapterImageFile = files[`modules[${i}][chapters][${j}][chapterImage]`]?.[0];
+          const pdfFile = files[`modules[${i}][chapters][${j}][pdf]`]?.[0];
 
           const [chapterImageUpload, pdfUpload] = await Promise.all([
             chapterImageFile ? uploadToCloudinary(chapterImageFile, 'chapters/images') : null,
             pdfFile ? uploadToCloudinary(pdfFile, 'chapters/pdfs') : null
           ]);
-          // console.log("chapter image url:",chapterImageUpload);
+
           await Chapter.create({
             chapterName: chapter.chapterName,
             summary: chapter.summary,
