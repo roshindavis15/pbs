@@ -44,13 +44,15 @@ const createUploadMiddleware = (req, res, next) => {
     { name: 'icon', maxCount: 1 },
     { name: 'image', maxCount: 1 }
   ];
-  console.log(req.body.modulesCount,'>>>>>>>')
-  const modulesCount = parseInt(req.body.modulesCount) || 10;
+  console.log(req.body,'>>>>>>>')
+  console.log(req.files,')))))))')
+  console.log(req.file,'%%%%%%%%')
+  const modulesCount = parseInt(req.body.modulesCount);
   
   for (let i = 0; i < modulesCount; i++) {
     fields.push({ name: `modules[${i}][moduleImage]`, maxCount: 1 });
     
-    const chaptersCount = parseInt(req.body[`modules[${i}][chaptersCount]`]) || 10;
+    const chaptersCount = parseInt(req.body[`modules[${i}][chaptersCount]`]) ;
     for (let j = 0; j < chaptersCount; j++) {
       fields.push({ name: `modules[${i}][chapters][${j}][chapterImage]`, maxCount: 1 });
       fields.push({ name: `modules[${i}][chapters][${j}][pdf]`, maxCount: 1 });
