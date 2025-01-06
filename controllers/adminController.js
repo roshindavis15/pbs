@@ -103,31 +103,31 @@ export const getUniversityHierarchy = async (req, res) => {
   }
 };
 
-export const editUniversityCard = async (req, res) => {
+export const editVertical = async (req, res) => {
   const { id } = req.query;
   console.log("id:", id);
   const { name, icon, image } = req.body;
 
   try {
-    const universityCard = await UniversityCard.findByPk(id);
+    const vertical = await Vertical.findByPk(id);
     console.log("universityCard:", universityCard);
 
-    if (!universityCard) {
+    if (!vertical) {
       return res.status(404).json({
         success: false,
-        message: 'University card not found'
+        message: 'vertical  not found'
       });
     }
 
-    await universityCard.update({ name, icon, image });
+    await vertical.update({ name, icon, image });
 
     res.status(200).json({
       success: true,
-      message: 'University card updated successfully',
-      data: universityCard
+      message: 'vertical updated successfully',
+      data: vertical
     });
   } catch (error) {
-    console.error('Error in editUniversityCard:', error);
+    console.error('Error in vertical:', error);
     res.status(500).json({ success: false, error: 'Server error' });
   }
 };
@@ -203,16 +203,16 @@ export const deleteData = async (req, res) => {
 
   try {
    
-    const universityCard = await UniversityCard.findByPk(id);
-    if (universityCard) {
+    const vertical = await Vertical.findByPk(id);
+    if (vertical) {
      
       await Module.destroy({
-        where: { universityCardId: id },
+        where: { verticalId: id },
       });
-      await UniversityCard.destroy({
+      await Vertical.destroy({
         where: { id },
       });
-      return res.status(200).json({ message: 'University card and related modules deleted successfully.' });
+      return res.status(200).json({ message: 'Vertical and related modules deleted successfully.' });
     }
 
    
