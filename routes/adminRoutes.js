@@ -45,12 +45,12 @@
       { name: 'image', maxCount: 1 }
     ];
 
-    const modulesCount = parseInt(req.body.modulesCount) || 1;
+    const modulesCount = parseInt(req.body.modulesCount) || 2;
     
     for (let i = 0; i < modulesCount; i++) {
       fields.push({ name: `modules[${i}][moduleImage]`, maxCount: 1 });
       
-      const chaptersCount = parseInt(req.body[`modules[${i}][chaptersCount]`]) || 1;
+      const chaptersCount = parseInt(req.body[`modules[${i}][chaptersCount]`]) || 2;
       for (let j = 0; j < chaptersCount; j++) {
         fields.push({ name: `modules[${i}][chapters][${j}][chapterImage]`, maxCount: 1 });
         fields.push({ name: `modules[${i}][chapters][${j}][pdf]`, maxCount: 1 });
