@@ -29,6 +29,7 @@ const fileFilter = (req, file, cb) => {
 };
 
 const createUploadMiddleware = (req, res, next) => {
+  console.log(req.body,'----------')
   const upload = multer({
     storage,
     fileFilter,
@@ -56,6 +57,7 @@ const createUploadMiddleware = (req, res, next) => {
   }
 
   upload.fields(fields)(req, res, (err) => {
+    console.log(req,'****')
     if (err instanceof multer.MulterError) {
       return res.status(400).json({ error: true, message: `Upload error: ${err.message}` });
     }
