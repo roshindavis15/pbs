@@ -47,7 +47,7 @@ export const addUniversityHierarchy = async (req, res) => {
       const moduleImageUpload = moduleImageFile
         ? await uploadToCloudinary(moduleImageFile, 'modules/images')
         : null;
-        console.log("moduleImageUpload:",moduleImageUpload);
+        // console.log("moduleImageUpload:",moduleImageUpload);
 
       const createdModule = await Module.create({
         moduleName: module.moduleName,
@@ -67,7 +67,7 @@ export const addUniversityHierarchy = async (req, res) => {
             chapterImageFile ? uploadToCloudinary(chapterImageFile, 'chapters/images') : null,
             pdfFile ? uploadToCloudinary(pdfFile, 'chapters/pdfs') : null
           ]);
-          console.log("chapter image url:",chapterImageUpload);
+          // console.log("chapter image url:",chapterImageUpload);
           await Chapter.create({
             chapterName: chapter.chapterName,
             summary: chapter.summary,
@@ -110,7 +110,6 @@ export const getUniversityHierarchy = async (req, res) => {
       ],
       attributes: ['id', 'name', 'icon', 'image'],
     });
-console.log(vertical,'hi')
     res.status(200).json({
       msg:"successful",
       one: vertical,
