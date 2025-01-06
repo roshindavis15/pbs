@@ -46,6 +46,7 @@ const createUploadMiddleware = (req, res, next) => {
   ];
   console.log(req.body,'>>>>>>>')
   console.log(req.files,'----------')
+  console.log(req.file,'----------')
   console.log(req.body.modulesCount,'$$$$$$$$')
 
   const modulesCount = parseInt(req.body.modulesCount) || 1;
@@ -64,6 +65,9 @@ const createUploadMiddleware = (req, res, next) => {
   })
 
   upload.fields(fields)(req, res, (err) => {
+    console.log(req.files,'^^^^^^^^^^^^^^^^^^')
+    console.log(req.file,'##########')
+    console.log(req.body,'!!!!!!!!!!!!!!!!1')
     if (err instanceof multer.MulterError) {
       return res.status(400).json({ error: true, message: `Upload error: ${err.message}` });
     }
