@@ -66,6 +66,7 @@ const createUploadMiddleware = (req, res, next) => {
   // Apply multer middleware
   upload.fields(fields)(req, res, (err) => {
     if (err instanceof multer.MulterError) {
+      console.log(err.message,'5678')
       return res.status(400).json({
         error: true,
         message: `Upload error: ${err.message}`
