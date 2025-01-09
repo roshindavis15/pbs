@@ -39,16 +39,13 @@ const uploadToCloudinary = async (file, folder = '') => {
     const uploadStream = cloudinary.uploader.upload_stream(
       {
         folder: folder,
-        resource_type: isPDF ? 'raw' : 'auto',
-        quality: 'auto',
-        fetch_format: 'auto',
-        public_id: isPDF ? `${Date.now()}.pdf` : undefined,
-        type: 'upload',
-        headers: isPDF ? {
-          'Content-Type': 'application/pdf',
-          'Content-Disposition': 'inline'
-        } : undefined,
-        format: isPDF ? 'pdf' : undefined
+        resource_type: 'auto',
+        format: isPDF ? 'pdf' : undefined,
+        flags: isPDF ? 'attachment' : undefined,
+        transformation: isPDF ? [{
+          flags: "attachment",
+          format: "pdf"
+        }] : undefined
       },
       (error, result) => {
         if (error) {
@@ -56,16 +53,11 @@ const uploadToCloudinary = async (file, folder = '') => {
           return reject(error);
         }
         
-        // For PDFs, construct a URL that will work with Cloudinary's PDF delivery
-        let url = result.secure_url;
-        if (isPDF) {
-          // Replace /raw/upload/ with /pdf/upload/ in the URL
-          url = url.replace('/raw/upload/', '/pdf/upload/');
-        }
+        const url = result.secure_url;
         
         resolve({
           inlineUrl: isPDF ? url : `${url}?inline=true`,
-          downloadUrl: isPDF ? `${url}?dl=1` : `${url}?attachment=true`,
+          downloadUrl: isPDF ? url : `${url}?attachment=true`,
           publicId: result.public_id
         });
       }
