@@ -106,7 +106,7 @@ export const getUniversityHierarchy = async (req, res) => {
 export const editVertical = async (req, res) => {
   const { id } = req.query;
   console.log("id:", id);
-  const { name, icon, image } = req.body;
+  const { name, icon, image } = req.body3;
 
   try {
     const vertical = await Vertical.findByPk(id);

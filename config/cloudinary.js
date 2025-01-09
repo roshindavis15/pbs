@@ -31,12 +31,15 @@ const uploadToCloudinary = async (file, folder = '') => {
   }
 
   const buffer = file.buffer || file;
+  
+  // Determine if the file is a PDF based on mimetype
+  const isPDF = file.mimetype === 'application/pdf';
 
   return new Promise((resolve, reject) => {
     const uploadStream = cloudinary.uploader.upload_stream(
       {
         folder: folder,
-        resource_type: 'auto', // This will automatically detect if it's an image or PDF
+        resource_type: isPDF ? 'raw' : 'auto', // Use 'raw' for PDFs, 'auto' for images
         quality: 'auto',
         fetch_format: 'auto',
       },
@@ -46,9 +49,12 @@ const uploadToCloudinary = async (file, folder = '') => {
           return reject(error);
         }
         
+        // For PDFs, we don't need to modify the URL since it's already a raw file
+        const url = result.secure_url;
+        
         resolve({
-          inlineUrl: `${result.secure_url}?inline=true`,
-          downloadUrl: `${result.secure_url}?attachment=true`,
+          inlineUrl: isPDF ? url : `${url}?inline=true`,
+          downloadUrl: isPDF ? `${url}?dl=1` : `${url}?attachment=true`,
           publicId: result.public_id
         });
       }
