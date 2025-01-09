@@ -35,9 +35,6 @@ const uploadToCloudinary = async (file, folder = '') => {
   // Determine if the file is a PDF based on mimetype
   const isPDF = file.mimetype === 'application/pdf';
 
-  // Get the original file extension for PDFs
-  const fileExtension = isPDF ? '.pdf' : '';
-
   return new Promise((resolve, reject) => {
     const uploadStream = cloudinary.uploader.upload_stream(
       {
@@ -45,7 +42,13 @@ const uploadToCloudinary = async (file, folder = '') => {
         resource_type: isPDF ? 'raw' : 'auto',
         quality: 'auto',
         fetch_format: 'auto',
-        public_id: isPDF ? `${Date.now()}${fileExtension}` : undefined // Add .pdf extension for PDF files
+        public_id: isPDF ? `${Date.now()}.pdf` : undefined,
+        type: 'upload',
+        headers: isPDF ? {
+          'Content-Type': 'application/pdf',
+          'Content-Disposition': 'inline'
+        } : undefined,
+        format: isPDF ? 'pdf' : undefined
       },
       (error, result) => {
         if (error) {
@@ -53,7 +56,12 @@ const uploadToCloudinary = async (file, folder = '') => {
           return reject(error);
         }
         
-        const url = result.secure_url;
+        // For PDFs, construct a URL that will work with Cloudinary's PDF delivery
+        let url = result.secure_url;
+        if (isPDF) {
+          // Replace /raw/upload/ with /pdf/upload/ in the URL
+          url = url.replace('/raw/upload/', '/pdf/upload/');
+        }
         
         resolve({
           inlineUrl: isPDF ? url : `${url}?inline=true`,
