@@ -200,40 +200,40 @@ export const editChapter = async (req, res) => {
 
 
 export const deleteData = async (req, res) => {
-  const { delteID } = req.query;
-  console.log("id:", delteID);
+  const { deleteID } = req.query;
+  console.log("id:", deleteID);
 
   try {
    
-    const vertical = await Vertical.findByPk(delteID);
+    const vertical = await Vertical.findByPk(deleteID);
     if (vertical) {
      
       await Module.destroy({
-        where: { verticalId: delteID },
+        where: { verticalId: deleteID },
       });
       await Vertical.destroy({
-        where: { delteID },
+        where: { deleteID },
       });
       return res.status(200).json({ message: 'Vertical and related modules deleted successfully.' });
     }
 
    
-    const module = await Module.findByPk(delteID);
+    const module = await Module.findByPk(deleteID);
     if (module) {
    
       await Chapter.destroy({
-        where: { moduleId: delteID },
+        where: { moduleId: deleteID },
       });
       await Module.destroy({
-        where: { delteID },
+        where: { deleteID },
       });
       return res.status(200).json({ message: 'Module and related chapters deleted successfully.' });
     }
 
-    const chapter = await Chapter.findByPk(delteID);
+    const chapter = await Chapter.findByPk(deleteID);
     if (chapter) {
       await Chapter.destroy({
-        where: { delteID },
+        where: { deleteID },
       });
       return res.status(200).json({ message: 'Chapter deleted successfully.' });
     }
