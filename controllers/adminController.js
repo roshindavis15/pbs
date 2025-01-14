@@ -94,7 +94,7 @@ export const getUniversityHierarchy = async (req, res) => {
       attributes: ['id', 'name', 'icon', 'image'],
     });
 
-   for(let modules of vertical?.dataValues?.modules){
+   for(let modules of vertical.dataValues.modules){
     console.log(modules,'this is modules &&&&&&&&')
     // for(let chp of modules.chapters){
     //   console.log(chp,'this is chpater-----------')
