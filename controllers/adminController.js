@@ -94,11 +94,11 @@ export const getUniversityHierarchy = async (req, res) => {
       attributes: ['id', 'name', 'icon', 'image'],
     });
 
-   for(let modules in vertical){
+   for(let modules of vertical?.dataValues?.modules){
     console.log(modules,'this is modules &&&&&&&&')
-    for(let chp of modules){
-      console.log(chp,'this is chpater-----------')
-    }
+    // for(let chp of modules.chapters){
+    //   console.log(chp,'this is chpater-----------')
+    // }
    }
     res.status(200).json({
       msg:"successful",
