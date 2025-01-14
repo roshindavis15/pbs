@@ -93,9 +93,11 @@ export const getUniversityHierarchy = async (req, res) => {
       ],
       attributes: ['id', 'name', 'icon', 'image'],
     });
+
+    console.log("verticalData:",vertical)
     res.status(200).json({
       msg:"successful",
-      one: vertical,
+      data: vertical,
     });
   } catch (error) {
     console.error(error);
@@ -198,40 +200,40 @@ export const editChapter = async (req, res) => {
 
 
 export const deleteData = async (req, res) => {
-  const { id } = req.query;
-  console.log("id:", id);
+  const { delteID } = req.query;
+  console.log("id:", delteID);
 
   try {
    
-    const vertical = await Vertical.findByPk(id);
+    const vertical = await Vertical.findByPk(delteID);
     if (vertical) {
      
       await Module.destroy({
-        where: { verticalId: id },
+        where: { verticalId: delteID },
       });
       await Vertical.destroy({
-        where: { id },
+        where: { delteID },
       });
       return res.status(200).json({ message: 'Vertical and related modules deleted successfully.' });
     }
 
    
-    const module = await Module.findByPk(id);
+    const module = await Module.findByPk(delteID);
     if (module) {
    
       await Chapter.destroy({
-        where: { moduleId: id },
+        where: { moduleId: delteID },
       });
       await Module.destroy({
-        where: { id },
+        where: { delteID },
       });
       return res.status(200).json({ message: 'Module and related chapters deleted successfully.' });
     }
 
-    const chapter = await Chapter.findByPk(id);
+    const chapter = await Chapter.findByPk(delteID);
     if (chapter) {
       await Chapter.destroy({
-        where: { id },
+        where: { delteID },
       });
       return res.status(200).json({ message: 'Chapter deleted successfully.' });
     }
@@ -245,4 +247,5 @@ export const deleteData = async (req, res) => {
     });
   }
 }
+
 
