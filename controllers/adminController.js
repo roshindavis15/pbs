@@ -85,7 +85,7 @@ export const getUniversityHierarchy = async (req, res) => {
             {
               model: Chapter,
               as: 'chapters',
-              attributes: ['id', 'chapterName', 'chapterImage', 'readingTime', 'pdf'],
+              attributes: ['id', 'chapterName','summary', 'chapterImage', 'readingTime', 'pdf'],
             },
           ],
           attributes: ['id', 'moduleName', 'moduleImage'],
@@ -94,12 +94,7 @@ export const getUniversityHierarchy = async (req, res) => {
       attributes: ['id', 'name', 'icon', 'image'],
     });
 
-   for(let modules of vertical.dataValues.modules){
-    console.log(modules,'this is modules &&&&&&&&')
-    // for(let chp of modules.chapters){
-    //   console.log(chp,'this is chpater-----------')
-    // }
-   }
+
     res.status(200).json({
       msg:"successful",
       data: vertical,
