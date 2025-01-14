@@ -200,6 +200,7 @@ export const editChapter = async (req, res) => {
 
 
 export const deleteData = async (req, res) => {
+  console.log("req.query:",req.query);
   const { deleteID } = req.query;
   console.log("id:", deleteID);
 
