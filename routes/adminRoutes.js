@@ -1,9 +1,11 @@
   import express from 'express';
   import {
     addUniversityHierarchy,
+    adminLogin,
+    adminLogout,
     deleteData,
-    editChapter,
-    editModule,
+    // editChapter,
+    // editModule,
     editVertical,
     getUniversityHierarchy,
   } from '../controllers/adminController.js';
@@ -77,10 +79,13 @@
 
   adminRouter.post('/add-university-hierarchy', createUploadMiddleware, addUniversityHierarchy);
   adminRouter.get('/get-university-hierarchy', getUniversityHierarchy);
-  adminRouter.put('/edit-vertical', editVertical);
-  adminRouter.put('/edit-module', editModule);
-  adminRouter.put('/edit-chapter', editChapter);
+    // adminRouter.put('/edit-vertical', editVertical);
+    // adminRouter.put('/edit-module', editModule);
+    // adminRouter.put('/edit-chapter', editChapter);
+    adminRouter.put('/edit-vertical',editVertical)
   adminRouter.delete('/delete-data', deleteData);
+  adminRouter.post('/login',adminLogin);
+  adminRouter.post('/logout',adminLogout);
  
 
   export default adminRouter; 

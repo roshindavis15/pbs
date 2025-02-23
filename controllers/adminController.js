@@ -1,6 +1,8 @@
-import { Vertical, Module, Chapter, sequelize } from '../models/index.js';
-import { v4 as uuid } from 'uuid';
+import { Vertical, Module, Chapter } from '../models/index.js';
 import uploadToCloudinary from '../config/cloudinary.js';
+import jwt from "jsonwebtoken";
+import { query } from 'express';
+
 
 
 
@@ -105,98 +107,98 @@ export const getUniversityHierarchy = async (req, res) => {
   }
 };
 
-export const editVertical = async (req, res) => {
-  const { id } = req.query;
-  console.log("id:", id);
-  const { name, icon, image } = req.body3;
+// export const editVertical = async (req, res) => {
+//   const { id } = req.query;
+//   console.log("id:", id);
+//   const { name, icon, image } = req.body3;
 
-  try {
-    const vertical = await Vertical.findByPk(id);
-    console.log("universityCard:", universityCard);
+//   try {
+//     const vertical = await Vertical.findByPk(id);
+//     console.log("universityCard:", universityCard);
 
-    if (!vertical) {
-      return res.status(404).json({
-        success: false,
-        message: 'vertical  not found'
-      });
-    }
+//     if (!vertical) {
+//       return res.status(404).json({
+//         success: false,
+//         message: 'vertical  not found'
+//       });
+//     }
 
-    await vertical.update({ name, icon, image });
+//     await vertical.update({ name, icon, image });
 
-    res.status(200).json({
-      success: true,
-      message: 'vertical updated successfully',
-      data: vertical
-    });
-  } catch (error) {
-    console.error('Error in vertical:', error);
-    res.status(500).json({ success: false, error: 'Server error' });
-  }
-};
+//     res.status(200).json({
+//       success: true,
+//       message: 'vertical updated successfully',
+//       data: vertical
+//     });
+//   } catch (error) {
+//     console.error('Error in vertical:', error);
+//     res.status(500).json({ success: false, error: 'Server error' });
+//   }
+// };
 
-export const editModule = async (req, res) => {
-  const { id } = req.query;
-  const { name, image } = req.body;
+// export const editModule = async (req, res) => {
+//   const { id } = req.query;
+//   const { name, image } = req.body;
 
-  try {
-    const module = await Module.findByPk(id);
+//   try {
+//     const module = await Module.findByPk(id);
 
-    if (!module) {
-      return res.status(404).json({
-        success: false,
-        message: 'Module not found'
-      });
-    }
+//     if (!module) {
+//       return res.status(404).json({
+//         success: false,
+//         message: 'Module not found'
+//       });
+//     }
 
-    await module.update({ name, image });
+//     await module.update({ name, image });
 
-    res.status(200).json({
-      success: true,
-      message: 'Module updated successfully',
-      data: module
-    });
-  } catch (error) {
-    console.error('Error in editModule:', error);
-    res.status(500).json({ success: false, error: 'Server error' });
-  }
-};
+//     res.status(200).json({
+//       success: true,
+//       message: 'Module updated successfully',
+//       data: module
+//     });
+//   } catch (error) {
+//     console.error('Error in editModule:', error);
+//     res.status(500).json({ success: false, error: 'Server error' });
+//   }
+// };
 
 
-export const editChapter = async (req, res) => {
-  const { id } = req.query;
-  console.log("id:", id);
-  const { name, image, readingTime, pdf, summary } = req.body;
+// export const editChapter = async (req, res) => {
+//   const { id } = req.query;
+//   console.log("id:", id);
+//   const { name, image, readingTime, pdf, summary } = req.body;
 
-  try {
-    const chapter = await Chapter.findByPk(id);
-    console.log("chapter:", chapter);
+//   try {
+//     const chapter = await Chapter.findByPk(id);
+//     console.log("chapter:", chapter);
 
-    if (!chapter) {
-      console.log("herer")
-      return res.status(404).json({
-        success: false,
-        message: 'Chapter not found'
-      });
-    }
+//     if (!chapter) {
+//       console.log("herer")
+//       return res.status(404).json({
+//         success: false,
+//         message: 'Chapter not found'
+//       });
+//     }
 
-    await chapter.update({
-      name,
-      image,
-      readingTime,
-      pdf,
-      summary
-    });
+//     await chapter.update({
+//       name,
+//       image,
+//       readingTime,
+//       pdf,
+//       summary
+//     });
 
-    res.status(200).json({
-      success: true,
-      message: 'Chapter updated successfully',
-      data: chapter
-    });
-  } catch (error) {
-    console.error('Error in editChapter:', error);
-    res.status(500).json({ success: false, error: 'Server error' });
-  }
-};
+//     res.status(200).json({
+//       success: true,
+//       message: 'Chapter updated successfully',
+//       data: chapter
+//     });
+//   } catch (error) {
+//     console.error('Error in editChapter:', error);
+//     res.status(500).json({ success: false, error: 'Server error' });
+//   }
+// };
 
 
 export const deleteData = async (req, res) => {
@@ -250,3 +252,42 @@ export const deleteData = async (req, res) => {
 }
 
 
+export const adminLogin=async(req,res)=>{
+  const {email,password}=req.body;
+  if(email !== process.env.ADMIN_EMAIL){
+    return res.status(401).json({message:'unauthorized'});
+  }
+  const isMatch=await bcrypt.compare(password,process.env.ADMIN_PASSWORD);
+  if(!isMatch){
+    return res.status(401).json({message:'Invalid credentials'})
+  }
+
+  const token=jwt.sign({email},process.env.JWT_SECRET,{expiresIn:'1h'});
+  
+  res.cookie("token",token,{
+    httpOnly:true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "Strict"
+  });
+
+  res.json({ message: "Logged in successfully" });
+
+
+}
+
+
+export const  adminLogout=async(req,res)=>{
+  res.clearCookie("token",{
+    httpOnly:true,
+    secure:true,
+    sameSite:"Strict"
+  });
+  res.json({message:"Loggout successfully"});
+}
+
+export const editVertical=async(req,res)=>{
+  const data= req.body;
+  const id=req.query;
+  console.log("dataaa:",data);
+  console.log("id:",id)
+}
